@@ -23,6 +23,7 @@
         pkgs.julia-bin.withPackages [
           "Aqua"
           "Artifacts"
+          "ArtifactUtils"
           "Documenter"
           "GeometryBasics"
           "JSON3"
