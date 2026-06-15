@@ -29,6 +29,7 @@
           "JSON3"
           "Libdl"
           "Makie"
+          "CairoMakie"
           "Printf"
           "Revise"
           "Test"
