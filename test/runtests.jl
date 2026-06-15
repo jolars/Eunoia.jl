@@ -257,6 +257,27 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
             @test (MK.colorbuffer(fap.figure); true)   # headless render smoke test
         end
 
+        @testset "edge colors" begin
+            # Without placement, every Lines plot is a set outline.
+            outline_colors(p) = [MK.to_color(x.color[])
+                                 for x in p.plots if x isa MK.Lines]
+
+            # Default: black outlines, regardless of fill colors.
+            dc = outline_colors(eunoiaplot(fit).plot)
+            @test !isempty(dc)
+            @test all(c -> c == MK.to_color(:black), dc)
+
+            # `edges = :match` colors each outline with its set's fill color.
+            mc = outline_colors(eunoiaplot(fit; edges=:match,
+                                           colors=[:red, :blue]).plot)
+            @test MK.to_color(:red) in mc && MK.to_color(:blue) in mc
+            @test !any(c -> c == MK.to_color(:black), mc)
+
+            # An explicit edge color still wins over the black default.
+            gc = outline_colors(eunoiaplot(fit; edges=Dict(:color => :green)).plot)
+            @test all(c -> c == MK.to_color(:green), gc)
+        end
+
         @testset "labels off" begin
             t = texts(eunoiaplot(fit; labels=false).plot)
             @test !("A" in t) && !("B" in t)
