@@ -98,7 +98,7 @@ mirror the `eunoia-py` `plot()` API:
 
 The fitting engine is the `eunoia-capi` cdylib from the
 [eunoia](https://github.com/jolars/eunoia) repository, cross-compiled for every
-Julia-supported platform and attached to that repo's `julia-v*` releases. The
+Julia-supported platform and attached to that repo's `v*` releases. The
 matching `Artifacts.toml` makes Julia download the right binary lazily on first
 use ("roll your own JLL" — no BinaryBuilder, no Yggdrasil).
 

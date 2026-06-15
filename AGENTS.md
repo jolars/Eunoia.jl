@@ -31,7 +31,7 @@ library" below).
 | `src/parse.jl`              | Input parsing (membership lists, inclusive↔exclusive, venn forms). |
 | `src/types.jl`              | Typed result model (`EulerFit`/`VennFit`, shapes, `LabelPlacement`) + `Base.show`. |
 | `ext/EunoiaMakieExt.jl`     | Makie rendering extension (recipe + `eunoiaplot`). Weakdep-triggered. |
-| `gen/generate_artifacts.jl` | Regenerates `Artifacts.toml` from a `julia-v*` release in jolars/eunoia. |
+| `gen/generate_artifacts.jl` | Regenerates `Artifacts.toml` from a `v*` release in jolars/eunoia. |
 | `test/`                     | `runtests.jl` (default), `aqua.jl`, and `test/makie/` (opt-in env). |
 | `docs/`                     | Documenter.jl site.                                                |
 
@@ -86,8 +86,9 @@ release is in the *other* repo. To cut a release:
 1. **In jolars/eunoia:** cut a normal crate release (versionary `v*` tag). The
    `julia-artifacts` workflow triggers on that tag, cross-compiles
    `libeunoia_capi-<triplet>.tar.gz` for every platform, and attaches them to
-   the same GitHub release — no extra step. (A manual `julia-v*` tag also works
-   for an off-cycle capi-only binary rebuild.)
+   the same GitHub release — no extra step. (To rebuild/attach binaries to an
+   existing release out of band, run `julia-artifacts` manually with its
+   `release_tag` input.)
 2. **Here:** regenerate and commit the artifact hashes, pointing at that release
    tag:
    ```sh
