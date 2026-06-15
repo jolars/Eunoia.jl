@@ -30,7 +30,8 @@ import Eunoia: AbstractEulerFit, eunoiaplot, eunoiaplot!
     "Per-region fill overrides: `Dict(combo => attrs)` of `poly!` keywords."
     fills = Makie.automatic
     "Set-outline style: a uniform attrs collection, a per-set `Dict`, or a
-    vector (one per set, shape order) of `lines!` keywords."
+    vector (one per set, shape order) of `lines!` keywords. Outlines are black
+    by default; pass `:match` to color each outline with its set's fill color."
     edges = Makie.automatic
     "Set labels: `false`/`true`/`nothing`, a per-set `Dict`, or a uniform style."
     labels = Makie.automatic
@@ -64,7 +65,7 @@ function Makie.plot!(p::EunoiaDiagram)
 
     draw_complement!(p, fit, p.complement[])
     draw_region_fills!(p, pd, base, p.fills[], p.alpha[])
-    draw_outlines!(p, pd, names, p.edges[])
+    draw_outlines!(p, pd, names, base, p.edges[])
 
     # The `eunoiaplot` wrapper handles labels itself when collision-aware
     # placement is requested (it owns the axis, which the loop needs); skip the
@@ -249,21 +250,28 @@ function draw_region_fills!(p, pd, base, fills, default_alpha)
     return
 end
 
-function draw_outlines!(p, pd, names, edges)
+# Borders default to black; `edges = :match`/`"match"` colors each set's outline
+# with its fill color instead (the pre-1.0 default). Either way, an explicit
+# `color` in the per-set/uniform `edges` style still wins.
+_edges_match(edges) = edges === :match || edges == "match"
+
+function draw_outlines!(p, pd, names, base, edges)
     haskey(pd, :shape_outlines) || return
+    match = _edges_match(edges)
     for (i, n) in enumerate(names)
         haskey(pd.shape_outlines, Symbol(n)) || continue
         pts = _ring(pd.shape_outlines[Symbol(n)])
         length(pts) < 3 && continue
         push!(pts, pts[1])                    # close the open polyline
-        attrs = merge((color = :black, linewidth = 1.5), edge_style(n, edges, i))
+        default_color = match ? base[n] : :black
+        attrs = merge((color = default_color, linewidth = 1.5), edge_style(n, edges, i))
         lines!(p, pts; attrs...)
     end
     return
 end
 
 function edge_style(name, edges, i)
-    edges === Makie.automatic && return (;)
+    (edges === Makie.automatic || _edges_match(edges)) && return (;)
     if edges isa AbstractDict
         if !isempty(edges) && all(v -> v isa Union{AbstractDict,NamedTuple}, values(edges))
             return haskey(edges, name) ? _kw(edges[name]) : (;)   # per-set

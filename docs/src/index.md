@@ -35,8 +35,8 @@ venn(["A", "B", "C"]; shape = "ellipse")
 
 `euler` returns an `EulerFit` and `venn` a `VennFit`, both carrying the fitted
 shapes, original/fitted values, per-region residuals and `region_error`, the
-overall `loss`, and (for complement fits) a `container`. See the
-[API Reference](@ref) for the full surface.
+overall `loss`, and (for complement fits) a `container`. See the [API
+Reference](@ref) for the full surface.
 
 ## Plotting
 
