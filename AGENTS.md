@@ -7,7 +7,8 @@ when working in this repository.
 
 Eunoia.jl is the Julia binding for [eunoia](https://github.com/jolars/eunoia), a
 Rust library for area-proportional **Euler and Venn diagrams**. It is a sister
-package to the Python binding [eunoia-py](https://github.com/jolars/eunoia-py).
+package to the Python binding [eunoia-py](https://github.com/jolars/eunoia-py)
+and R bindings [eulerr](https://github.com/jolars/eulerr).
 
 The package is a thin, typed Julia surface over the `eunoia-capi` cdylib, which
 speaks a small JSON-in/JSON-out C ABI (`eunoia_euler`, `eunoia_venn`,
