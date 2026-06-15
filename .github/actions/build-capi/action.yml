@@ -1,0 +1,43 @@
+name: Build eunoia-capi
+description: >
+  Build the eunoia-capi cdylib from the jolars/eunoia monorepo and export its
+  path as EUNOIA_CAPI_LIB, so the Julia tests run against a locally built native
+  library (no published artifact required).
+
+inputs:
+  ref:
+    description: git ref of jolars/eunoia to build the capi from
+    required: false
+    default: main
+
+runs:
+  using: composite
+  steps:
+    - name: Checkout eunoia (capi source)
+      uses: actions/checkout@v4
+      with:
+        repository: jolars/eunoia
+        ref: ${{ inputs.ref }}
+        path: .eunoia-src
+
+    - name: Install Rust
+      # The checkout's rust-toolchain.toml pins the MSRV; cargo respects it when
+      # building inside .eunoia-src.
+      uses: dtolnay/rust-toolchain@stable
+
+    - name: Build cdylib
+      shell: bash
+      working-directory: .eunoia-src
+      run: cargo build -p eunoia-capi --release
+
+    - name: Export EUNOIA_CAPI_LIB
+      shell: bash
+      run: |
+        root="$GITHUB_WORKSPACE/.eunoia-src/target/release"
+        case "$RUNNER_OS" in
+          Linux)   lib="libeunoia_capi.so" ;;
+          macOS)   lib="libeunoia_capi.dylib" ;;
+          Windows) lib="eunoia_capi.dll" ;;
+          *) echo "unsupported runner OS: $RUNNER_OS" >&2; exit 1 ;;
+        esac
+        echo "EUNOIA_CAPI_LIB=$root/$lib" >> "$GITHUB_ENV"

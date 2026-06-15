@@ -1,0 +1,51 @@
+# Eunoia
+
+Area-proportional **Euler and Venn diagrams** for Julia.
+
+Eunoia fits and draws diagrams in which the areas of overlapping shapes
+(circles, ellipses, squares, or rectangles) are made to match a set of input
+quantities as closely as possible. It is the Julia binding for
+[eunoia](https://github.com/jolars/eunoia), a Rust library, and a sister package
+to the Python binding [eunoia-py](https://github.com/jolars/eunoia-py).
+
+The fitting engine ships as a native library reached through a small C ABI; its
+binaries are delivered as a lazily-downloaded Julia artifact, so installing the
+package needs no Rust toolchain.
+
+## Installation
+
+Until Eunoia is registered in the General registry, install it from GitHub:
+
+```julia
+using Pkg
+Pkg.add(url = "https://github.com/jolars/Eunoia.jl")
+```
+
+## Quick start
+
+```julia
+using Eunoia
+
+# Euler diagram from exclusive areas
+fit = euler(Dict("A" => 5, "B" => 3, "A&B" => 1.5))
+
+# Canonical Venn diagram with ellipses
+venn(["A", "B", "C"]; shape = "ellipse")
+```
+
+`euler` returns an `EulerFit` and `venn` a `VennFit`, both carrying the fitted
+shapes, original/fitted values, per-region residuals and `region_error`, the
+overall `loss`, and (for complement fits) a `container`. See the
+[API Reference](@ref) for the full surface.
+
+## Plotting
+
+Rendering lives in a [Makie](https://docs.makie.org) package extension that
+loads automatically once a backend is imported:
+
+```julia
+using Eunoia, CairoMakie
+
+fit = euler(Dict("A" => 5, "B" => 3, "A&B" => 1.5))
+eunoiaplot(fit; quantities = true, legend = true)
+```

@@ -1,0 +1,6 @@
+[deps]
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+Eunoia = "7d9f3c1e-5a2b-4c6d-9e8f-1a2b3c4d5e6f"
+
+[compat]
+Documenter = "1.2"
