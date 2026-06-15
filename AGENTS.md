@@ -83,13 +83,16 @@ make docs    # build the Documenter site locally
 The capi binaries and the Julia package version separately, and the binary
 release is in the *other* repo. To cut a release:
 
-1. **In jolars/eunoia:** push a `julia-v<version>` tag → the `julia-artifacts`
-   workflow cross-compiles `libeunoia_capi-<triplet>.tar.gz` for every platform
-   and attaches them to the release.
-2. **Here:** regenerate and commit the artifact hashes:
+1. **In jolars/eunoia:** cut a normal crate release (versionary `v*` tag). The
+   `julia-artifacts` workflow triggers on that tag, cross-compiles
+   `libeunoia_capi-<triplet>.tar.gz` for every platform, and attaches them to
+   the same GitHub release — no extra step. (A manual `julia-v*` tag also works
+   for an off-cycle capi-only binary rebuild.)
+2. **Here:** regenerate and commit the artifact hashes, pointing at that release
+   tag:
    ```sh
    julia -e 'import Pkg; Pkg.add("ArtifactUtils")'
-   julia --project=. gen/generate_artifacts.jl julia-v<version>
+   julia --project=. gen/generate_artifacts.jl v<version>
    ```
 3. Bump `version` in `Project.toml` (independent semver — not tied to the Rust
    crate's version) and merge.

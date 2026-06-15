@@ -28,6 +28,8 @@ const ARTIFACTS_TOML = normpath(joinpath(@__DIR__, "..", "Artifacts.toml"))
 const TARGETS = [
     (Platform("x86_64", "linux"; libc="glibc"), "libeunoia_capi-x86_64-linux-gnu.tar.gz"),
     (Platform("aarch64", "linux"; libc="glibc"), "libeunoia_capi-aarch64-linux-gnu.tar.gz"),
+    (Platform("x86_64", "linux"; libc="musl"), "libeunoia_capi-x86_64-linux-musl.tar.gz"),
+    (Platform("aarch64", "linux"; libc="musl"), "libeunoia_capi-aarch64-linux-musl.tar.gz"),
     (Platform("x86_64", "macos"), "libeunoia_capi-x86_64-apple-darwin.tar.gz"),
     (Platform("aarch64", "macos"), "libeunoia_capi-aarch64-apple-darwin.tar.gz"),
     (Platform("x86_64", "windows"), "libeunoia_capi-x86_64-w64-mingw32.tar.gz"),
