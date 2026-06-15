@@ -10,6 +10,12 @@
   ];
 
   languages = {
+    rust = {
+      enable = true;
+
+      channel = "stable";
+    };
+
     julia = {
       enable = true;
 
