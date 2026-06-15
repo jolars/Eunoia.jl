@@ -2,7 +2,8 @@
 
 [![](https://img.shields.io/badge/docs-stable-blue.svg)](https://jolars.github.io/Eunoia.jl/stable)
 [![](https://img.shields.io/badge/docs-dev-blue.svg)](https://jolars.github.io/Eunoia.jl/dev)
-[![Build Status](https://github.com/jolars/Eunoia.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/jolars/Eunoia.jl/actions/workflows/CI.yml?query=branch%3Amain)
+[![Build
+Status](https://github.com/jolars/Eunoia.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/jolars/Eunoia.jl/actions/workflows/CI.yml?query=branch%3Amain)
 
 Area-Proportional Euler and Venn Diagrams.
 
@@ -15,8 +16,8 @@ and is a sister package to the Python binding
 [eunoia-py](https://github.com/jolars/eunoia-py).
 
 The fitting engine is the native `eunoia-capi` library, reached through a small
-JSON-in/JSON-out C ABI. Its binaries ship as a Julia **artifact** and are fetched
-lazily on first use, so installing the package needs no Rust toolchain.
+JSON-in/JSON-out C ABI. Its binaries ship as a Julia **artifact** and are
+fetched lazily on first use, so installing the package needs no Rust toolchain.
 
 ## Installation
 
@@ -64,7 +65,8 @@ Common keyword arguments:
 
 Fitting can be tuned further (`loss`, `n_restarts`, `optimizer`, `mds_solver`,
 `max_sets`, …) and the plot geometry adjusted (`n_vertices`, `label_precision`,
-`sliver_threshold`); see the [documentation](https://jolars.github.io/Eunoia.jl/).
+`sliver_threshold`); see the
+[documentation](https://jolars.github.io/Eunoia.jl/).
 
 ## Plotting
 
@@ -72,7 +74,7 @@ Rendering lives in a **Makie package extension** that loads automatically once a
 Makie backend is imported, so the core package stays plot-free:
 
 ```julia
-using Eunoia, CairoMakie   # or GLMakie / WGLMakie
+using Eunoia, CairoMakie   # or GLMakie/WGLMakie
 
 fit = euler(Dict("A" => 5, "B" => 3, "A&B" => 1.5))
 eunoiaplot(fit)                                # publication-ready figure
@@ -81,26 +83,25 @@ eunoiaplot(fit; quantities = true, legend = true)
 
 `eunoiaplot(fit)` returns a `Makie.FigureAxisPlot` with equal aspect and no axis
 decorations; `eunoiaplot!(ax, fit)` draws into an existing axis, and the bare
-Makie `plot(fit)` / `plot!(ax, fit)` recipe forms work too. Styling keywords
+Makie `plot(fit)`/`plot!(ax, fit)` recipe forms work too. Styling keywords
 mirror the `eunoia-py` `plot()` API:
 
-- `colors` — a vector (set order) or `Dict(name => color)`; region fills blend
+- `colors`: a vector (set order) or `Dict(name => color)`; region fills blend
   the member colors perceptually (OKLab).
-- `fills`, `edges` — per-region / per-set style overrides.
-- `labels` — `false` / `true`, a per-set `Dict`, or a uniform style.
-- `quantities` — `false` / `true`, `"original"` / `"fitted"`,
-  `"counts"` / `"percent"`, or a `Dict`.
-- `legend` — `false` / `true` or a `Dict` of `Legend` keywords.
-- `complement` — container-box style (drawn only for complement fits).
-- `placement` — opt into collision-aware label placement with leader lines.
+- `fills`, `edges`: per-region/per-set style overrides.
+- `labels`: `false`/true`, a per-set`Dict\`, or a uniform style.
+- `quantities`: `false`/`true`, `"original"`/`"fitted"`, `"counts"`/`"percent"`,
+  or a `Dict`.
+- `legend`: `false`/`true` or a `Dict` of `Legend` keywords.
+- `complement`: container-box style (drawn only for complement fits).
+- `placement`: opt into collision-aware label placement with leader lines.
 
 ## The native library
 
 The fitting engine is the `eunoia-capi` cdylib from the
 [eunoia](https://github.com/jolars/eunoia) repository, cross-compiled for every
-Julia-supported platform and attached to that repo's `v*` releases. The
-matching `Artifacts.toml` makes Julia download the right binary lazily on first
-use ("roll your own JLL" — no BinaryBuilder, no Yggdrasil).
+Julia-supported platform and attached to that repo's `v*` releases. The matching
+`Artifacts.toml` makes Julia download the right binary lazily on first use.
 
 To develop against a local Rust build instead, point `EUNOIA_CAPI_LIB` at it; it
 always wins over the bundled artifact:
@@ -111,9 +112,27 @@ cargo build -p eunoia-capi --release
 export EUNOIA_CAPI_LIB="$PWD/target/release/libeunoia_capi.so"  # .dylib on macOS
 ```
 
+## Ecosystem
+
+This package is the Python member of the [Eunoia](https://eunoia.bz) family. The
+same Rust core powers bindings in several languages:
+
+  | Project                                            | Language             | Distribution                                        |
+  | -------------------------------------------------- | -------------------- | --------------------------------------------------- |
+  | **Eunoia.jl** (this package)                       | Julia                |                                                     |
+  | [Eunoia](https://github.com/jolars/eunoia)         | Rust (core)          | [crates.io](https://crates.io/crates/eunoia)        |
+  | [@jolars/eunoia](https://github.com/jolars/eunoia) | JavaScript/TS (WASM) | [npm](https://www.npmjs.com/package/@jolars/eunoia) |
+  | [Eunoia](https://github.com/jolars/eunoia-py)      | Python               | [PyPI](https://pypi.org/project/eunoia/)            |
+  | [eulerr](https://github.com/jolars/eulerr)         | R (original)         | [CRAN](https://cran.r-project.org/package=eulerr)   |
+
+Narrative documentation for the whole family lives at
+[eunoia.bz/docs/](https://eunoia.bz/docs/); the Rust API reference is at
+[docs.rs/eunoia](https://docs.rs/eunoia/).
+
 ## Contributing
 
-When writing commit messages, please use the [conventional commits format](https://www.conventionalcommits.org/en/v1.0.0/).
+When writing commit messages, please use the [conventional commits
+format](https://www.conventionalcommits.org/en/v1.0.0/).
 
 ## Versioning
 
