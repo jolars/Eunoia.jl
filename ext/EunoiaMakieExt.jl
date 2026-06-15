@@ -64,7 +64,7 @@ function Makie.plot!(p::EunoiaDiagram)
 
     draw_complement!(p, fit, p.complement[])
     draw_region_fills!(p, pd, base, p.fills[], p.alpha[])
-    draw_outlines!(p, pd, names, base, p.edges[])
+    draw_outlines!(p, pd, names, p.edges[])
 
     # The `eunoiaplot` wrapper handles labels itself when collision-aware
     # placement is requested (it owns the axis, which the loop needs); skip the
@@ -249,14 +249,14 @@ function draw_region_fills!(p, pd, base, fills, default_alpha)
     return
 end
 
-function draw_outlines!(p, pd, names, base, edges)
+function draw_outlines!(p, pd, names, edges)
     haskey(pd, :shape_outlines) || return
     for (i, n) in enumerate(names)
         haskey(pd.shape_outlines, Symbol(n)) || continue
         pts = _ring(pd.shape_outlines[Symbol(n)])
         length(pts) < 3 && continue
         push!(pts, pts[1])                    # close the open polyline
-        attrs = merge((color = base[n], linewidth = 1.5), edge_style(n, edges, i))
+        attrs = merge((color = :black, linewidth = 1.5), edge_style(n, edges, i))
         lines!(p, pts; attrs...)
     end
     return
