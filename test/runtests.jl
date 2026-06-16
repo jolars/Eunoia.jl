@@ -258,7 +258,8 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
         end
 
         @testset "edge colors" begin
-            # Without placement, every Lines plot is a set outline.
+            # These labels fit inside their regions, so no leader lines are
+            # drawn and every Lines plot is a set outline.
             outline_colors(p) = [MK.to_color(x.color[])
                                  for x in p.plots if x isa MK.Lines]
 
@@ -354,6 +355,12 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
                 @test (MK.colorbuffer(fp.figure); true)
             end
 
+            # Placement is on by default (raycast): the same crowded diagram
+            # draws leaders even without an explicit `placement` kwarg.
+            dflt = eunoiaplot(crowded; quantities=true, fontsize=26,
+                              figure=(; size=(620, 540)))
+            @test nlines(dflt.plot) > 3
+
             # Leader styling is forwarded to the leader lines.
             fs = eunoiaplot(crowded; placement=true, quantities=true, fontsize=26,
                             figure=(; size=(620, 540)),
@@ -369,7 +376,7 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
             @test maximum(MK.widths(fb.axis.finallimits[])) < 1e4
             @test (MK.colorbuffer(fb.figure); true)
 
-            # `placement=false` (default) leaves the raw-anchor path untouched.
+            # `placement=false` opts out to the raw-anchor path.
             @test "A" in texts(eunoiaplot(fit; placement=false).plot)
         end
     end

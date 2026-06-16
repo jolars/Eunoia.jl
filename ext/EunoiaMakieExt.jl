@@ -105,15 +105,15 @@ function eunoiaplot(fit::AbstractEulerFit; figure = (;), axis = (;),
 end
 
 """
-    eunoiaplot!(ax, fit; placement=false, leader_style=(;), kwargs...)
+    eunoiaplot!(ax, fit; placement=true, leader_style=(;), kwargs...)
 
-Draw a fit into an existing axis. With `placement=false` (default) labels sit at
-their raw anchors. A truthy `placement` turns on collision-aware placement (see
-[`Eunoia.eunoiaplot`](@ref) for the value forms); the resolved label boxes and
-any exterior leader polylines are drawn into `ax`. `leader_style` is a collection
-of `lines!` keywords for the leader lines.
+Draw a fit into an existing axis. By default (`placement=true`) labels are placed
+collision-aware via raycast (see [`Eunoia.eunoiaplot`](@ref) for the value
+forms); the resolved label boxes and any exterior leader polylines are drawn into
+`ax`. Pass `placement=false` to instead leave labels at their raw anchors.
+`leader_style` is a collection of `lines!` keywords for the leader lines.
 """
-function eunoiaplot!(ax, fit::AbstractEulerFit; placement = false,
+function eunoiaplot!(ax, fit::AbstractEulerFit; placement = true,
                      leader_style = (;), kwargs...)
     if placement === false
         return eunoiadiagram!(ax, fit; kwargs...)
