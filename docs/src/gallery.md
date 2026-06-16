@@ -415,20 +415,25 @@ eunoiaplot!(right, venn(5; shape = "ellipse"))
 f
 ```
 
-### Squares and rectangles
+### Squares
 
-Square and rectangle Venn diagrams support up to three sets.
+Venn diagrams of up to three sets can be drawn with square shapes instead of the
+default ellipse. Here the two sit side by side for the same three sets.
 
 ```@example gallery
 f = Figure(size = (900, 400))
-left = Axis(f[1, 1]; aspect = DataAspect())
-right = Axis(f[1, 2]; aspect = DataAspect())
+left = Axis(f[1, 1]; aspect = DataAspect(), title = "ellipse")
+right = Axis(f[1, 2]; aspect = DataAspect(), title = "square")
 hidedecorations!(left); hidespines!(left)
 hidedecorations!(right); hidespines!(right)
-eunoiaplot!(left, venn(3; shape = "square"))
-eunoiaplot!(right, venn(3; shape = "rectangle"))
+eunoiaplot!(left, venn(3; shape = "ellipse"))
+eunoiaplot!(right, venn(3; shape = "square"))
 f
 ```
+
+`"rectangle"` is accepted too (up to three sets), but the symmetric Venn layout
+renders it identically to a square — rectangles only differ from squares in
+area-proportional Euler diagrams.
 
 ### From membership lists
 
