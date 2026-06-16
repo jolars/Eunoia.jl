@@ -335,7 +335,7 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
         @testset "collision-aware placement" begin
             # Interior placement: set names + counts combine into one box per
             # region; nothing is drawn twice (recipe defers to the wrapper).
-            fap = eunoiaplot(fit; placement=true, quantities=true)
+            fap = eunoiaplot(fit; label_placement=true, quantities=true)
             t = texts(fap.plot)
             @test "A" in t && "B" in t          # set names placed
             @test count(==("A"), t) == 1        # not double-drawn
@@ -349,20 +349,20 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
                                  "Apple&Cherry" => 0.6, "Apple&Banana&Cherry" => 0.2);
                             seed=4)
             for strat in (true, (; placement="force_directed"), (; leader="elbow"))
-                fp = eunoiaplot(crowded; placement=strat, quantities=true,
+                fp = eunoiaplot(crowded; label_placement=strat, quantities=true,
                                 fontsize=26, figure=(; size=(620, 540)))
                 @test nlines(fp.plot) > 3       # 3 outlines + ≥1 leader
                 @test (MK.colorbuffer(fp.figure); true)
             end
 
             # Placement is on by default (raycast): the same crowded diagram
-            # draws leaders even without an explicit `placement` kwarg.
+            # draws leaders even without an explicit `label_placement` kwarg.
             dflt = eunoiaplot(crowded; quantities=true, fontsize=26,
                               figure=(; size=(620, 540)))
             @test nlines(dflt.plot) > 3
 
             # Leader styling is forwarded to the leader lines.
-            fs = eunoiaplot(crowded; placement=true, quantities=true, fontsize=26,
+            fs = eunoiaplot(crowded; label_placement=true, quantities=true, fontsize=26,
                             figure=(; size=(620, 540)),
                             leader_style=(; color=:red, linewidth=2.0))
             @test any(x -> x isa MK.Lines && x.color[] == MK.to_color(:red), fs.plot.plots)
@@ -371,13 +371,13 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
             # guard keeps the view bounded and the render finite.
             big = euler(Dict("LongNameAlpha" => 4.0, "LongNameBeta" => 4.0,
                              "LongNameAlpha&LongNameBeta" => 3.5); seed=1)
-            fb = eunoiaplot(big; placement=true, fontsize=40, figure=(; size=(120, 100)))
+            fb = eunoiaplot(big; label_placement=true, fontsize=40, figure=(; size=(120, 100)))
             @test all(isfinite, MK.widths(fb.axis.finallimits[]))
             @test maximum(MK.widths(fb.axis.finallimits[])) < 1e4
             @test (MK.colorbuffer(fb.figure); true)
 
-            # `placement=false` opts out to the raw-anchor path.
-            @test "A" in texts(eunoiaplot(fit; placement=false).plot)
+            # `label_placement=false` opts out to the raw-anchor path.
+            @test "A" in texts(eunoiaplot(fit; label_placement=false).plot)
         end
     end
 end

@@ -105,23 +105,23 @@ function eunoiaplot(fit::AbstractEulerFit; figure = (;), axis = (;),
 end
 
 """
-    eunoiaplot!(ax, fit; placement=true, leader_style=(;), kwargs...)
+    eunoiaplot!(ax, fit; label_placement=true, leader_style=(;), kwargs...)
 
-Draw a fit into an existing axis. By default (`placement=true`) labels are placed
-collision-aware via raycast (see [`Eunoia.eunoiaplot`](@ref) for the value
+Draw a fit into an existing axis. By default (`label_placement=true`) labels are
+placed collision-aware via raycast (see [`Eunoia.eunoiaplot`](@ref) for the value
 forms); the resolved label boxes and any exterior leader polylines are drawn into
-`ax`. Pass `placement=false` to instead leave labels at their raw anchors.
+`ax`. Pass `label_placement=false` to instead leave labels at their raw anchors.
 `leader_style` is a collection of `lines!` keywords for the leader lines.
 """
-function eunoiaplot!(ax, fit::AbstractEulerFit; placement = true,
+function eunoiaplot!(ax, fit::AbstractEulerFit; label_placement = true,
                      leader_style = (;), kwargs...)
-    if placement === false
+    if label_placement === false
         return eunoiadiagram!(ax, fit; kwargs...)
     end
     # The recipe draws geometry only; we own the axis, so we run the
     # measure → place → render loop and draw the labels + leaders ourselves.
     p = eunoiadiagram!(ax, fit; defer_labels = true, kwargs...)
-    place_and_draw_labels!(ax, p, fit, placement, leader_style)
+    place_and_draw_labels!(ax, p, fit, label_placement, leader_style)
     return p
 end
 
@@ -406,7 +406,7 @@ function format_quantity(v, total, types)
 end
 
 # ---------------------------------------------------------------------------
-# Collision-aware placement (the `placement=` path of `eunoiaplot`)
+# Collision-aware placement (the `label_placement=` path of `eunoiaplot`)
 #
 # `place_labels` (the native core) needs each region's label box in *layout*
 # units, but Makie text metrics come back in pixels and the data↔pixel scale is
@@ -555,7 +555,7 @@ function placement_bbox(geom, placements, sizes_data)
     return (xmin, xmax, ymin, ymax)
 end
 
-function place_and_draw_labels!(ax, p, fit, placement, leader_style)
+function place_and_draw_labels!(ax, p, fit, label_placement, leader_style)
     pd = fit.plot_data
     names = String[s.set for s in fit.shapes]
     base = resolve_colors(p.colors[], names)
@@ -572,7 +572,7 @@ function place_and_draw_labels!(ax, p, fit, placement, leader_style)
     gap = 0.15 * fontsize
     boxes_px = Dict(combo => measure_box(lines, font, gap)
                     for (combo, lines) in lines_by_region)
-    strat = placement isa Union{NamedTuple,AbstractDict} ? _kw(placement) : (;)
+    strat = label_placement isa Union{NamedTuple,AbstractDict} ? _kw(label_placement) : (;)
     geom = geom_bbox(fit)
 
     geom_extent = max(geom[2] - geom[1], geom[4] - geom[3])

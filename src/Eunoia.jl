@@ -406,7 +406,7 @@ end
 
 """
     eunoiaplot(fit; colors, fills, edges, labels, quantities, legend, complement,
-               fontsize=14, placement=true, leader_style=(;), figure=(;), axis=(;))
+               fontsize=14, label_placement=true, leader_style=(;), figure=(;), axis=(;))
 
 Render a fitted [`EulerFit`](@ref)/[`VennFit`](@ref) as a publication-ready Makie
 figure (equal aspect, no axis decorations), returning a `Makie.FigureAxisPlot`.
@@ -432,7 +432,7 @@ Styling keywords mirror the `eunoia-py` `plot()` API:
 
 Collision-aware labels:
 
-- `placement`: `true` (default) places labels collision-aware via
+- `label_placement`: `true` (default) places labels collision-aware via
   [`place_labels`](@ref): each region's label is measured (Makie text metrics),
   positioned inside its region when it fits, else pushed outside with a leader
   line. Set names and quantities are combined into one box per region, so a set
@@ -440,22 +440,22 @@ Collision-aware labels:
   exterior solver with straight leaders; pass a `NamedTuple`/`Dict` of
   [`place_labels`](@ref) strategy knobs (`placement`, `leader`, `tether`,
   `margin`, `iterations`, `precision`, `leader_gap`, `min_gap`) to change it,
-  e.g. `placement = (; placement = "force_directed")` or
-  `placement = (; leader = "elbow", tether = "boundary")`. Pass `placement=false`
-  to instead draw labels at their raw anchors.
+  e.g. `label_placement = (; placement = "force_directed")` or
+  `label_placement = (; leader = "elbow", tether = "boundary")`. Pass
+  `label_placement=false` to instead draw labels at their raw anchors.
 - `leader_style`: collection of `lines!` keywords styling the leader lines.
 
 Collision-aware placement needs the axis (to convert pixel text metrics to
 layout units), so it is available through `eunoiaplot`/`eunoiaplot!` only; the
-bare `plot(fit)` recipe form ignores `placement`.
+bare `plot(fit)` recipe form ignores `label_placement`.
 """
 function eunoiaplot end
 
 """
-    eunoiaplot!(ax, fit; placement=true, leader_style=(;), kwargs...)
+    eunoiaplot!(ax, fit; label_placement=true, leader_style=(;), kwargs...)
 
 Draw a fitted diagram into an existing Makie axis `ax`. Same styling keywords as
-[`eunoiaplot`](@ref) (including `placement`/`leader_style` for collision-aware
+[`eunoiaplot`](@ref) (including `label_placement`/`leader_style` for collision-aware
 labels, on by default); does not alter the axis aspect or decorations.
 """
 function eunoiaplot! end
