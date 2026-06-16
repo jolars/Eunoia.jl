@@ -1,0 +1,32 @@
+version: "3"
+
+vars:
+  JULIA: julia
+
+tasks:
+  default:
+    desc: Install dependencies
+    cmds:
+      - task: install
+
+  install:
+    desc: Install and instantiate package dependencies
+    cmds:
+      - '{{.JULIA}} -e "using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()"'
+
+  test:
+    desc: Run package tests
+    cmds:
+      - '{{.JULIA}} --project=. -e "using Pkg; Pkg.test()"'
+
+  docs:
+    desc: Build documentation
+    cmds:
+      - '{{.JULIA}} --project=docs/ -e "using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()"'
+      - "{{.JULIA}} --project=docs/ docs/make.jl"
+
+  docs:serve:
+    desc: Live-preview documentation (rebuilds on change, reloads the browser)
+    cmds:
+      - '{{.JULIA}} --project=docs/ -e "using Pkg; Pkg.develop(PackageSpec(path=pwd())); Pkg.instantiate()"'
+      - "{{.JULIA}} --project=docs/ docs/serve.jl"

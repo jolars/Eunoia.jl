@@ -43,9 +43,13 @@ Reference](@ref) for the full surface.
 Rendering lives in a [Makie](https://docs.makie.org) package extension that
 loads automatically once a backend is imported:
 
-```julia
+```@example
 using Eunoia, CairoMakie
+CairoMakie.activate!(type = "png") # hide
 
 fit = euler(Dict("A" => 5, "B" => 3, "A&B" => 1.5))
 eunoiaplot(fit; quantities = true, legend = true)
 ```
+
+See the [gallery](@ref "A gallery of Euler and Venn diagrams") for a tour of the
+plotting options.
