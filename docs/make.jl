@@ -28,5 +28,5 @@ makedocs(;
 )
 
 deploydocs(
-  repo="https://github.com/jolars/Eunoia.jl.git"
+  repo="github.com/jolars/Eunoia.jl.git"
 )
