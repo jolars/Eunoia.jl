@@ -361,6 +361,15 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
                               figure=(; size=(620, 540)))
             @test nlines(dflt.plot) > 3
 
+            # A set with zero exclusive area is hosted in an intersection region
+            # (here C → A&B&C, via the core's `set_anchor_regions`); its name is
+            # combined into that region's box and drawn exactly once.
+            contained = euler(Dict("A" => 7.0, "B" => 6.0, "C" => 0.0, "A&B" => 0.0,
+                                   "A&C" => 1.0, "B&C" => 1.0, "A&B&C" => 2.0);
+                              shape="ellipse", seed=1)
+            tc = texts(eunoiaplot(contained; quantities=true).plot)
+            @test count(==("C"), tc) == 1
+
             # Leader styling is forwarded to the leader lines.
             fs = eunoiaplot(crowded; label_placement=true, quantities=true, fontsize=26,
                             figure=(; size=(620, 540)),

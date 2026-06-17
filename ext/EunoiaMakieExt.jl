@@ -422,10 +422,18 @@ const PLACE_EXTENT_TOL = 0.02   # converged when the view extent moves < 2%
 # Cap the view at this multiple of the geometry and keep the last sane layout.
 const MAX_BBOX_FACTOR = 25.0
 
-# Reverse `PlotData::set_anchor_regions` without a dedicated capi field: a set's
-# anchor is, by construction, exactly its host region's anchor, so the JSON
-# floats are byte-identical and match under `==`.
+# Which region hosts each set's label anchor, as a set → combination map. The
+# core computes this (`PlotData::set_anchor_regions`); capis ≥ 1.4 expose it
+# directly, so use it. Older capis lack the field: fall back to matching set
+# anchors to region anchors by position (a set's anchor is its host region's
+# anchor, so the JSON floats match under `==` — except where the two are
+# computed separately and differ in their last bits, which is exactly why the
+# native field exists).
 function set_host_regions(pd)
+    if haskey(pd, :set_anchor_regions)
+        return Dict{String,String}(String(s) => String(r)
+                                   for (s, r) in pairs(pd.set_anchor_regions))
+    end
     hosts = Dict{String,String}()
     (haskey(pd, :set_anchors) && haskey(pd, :region_anchors)) || return hosts
     for (s, sa) in pairs(pd.set_anchors)
