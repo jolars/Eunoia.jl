@@ -26,6 +26,7 @@
           "ArtifactUtils"
           "Documenter"
           "GeometryBasics"
+          "DocumenterTools"
           "JSON3"
           "Libdl"
           "Makie"
