@@ -21,12 +21,12 @@ fetched lazily on first use, so installing the package needs no Rust toolchain.
 
 ## Installation
 
-Until Eunoia is registered in the General registry, install it from GitHub with
-the Julia package manager:
+Eunoia is registered in the General registry, so install it with the Julia
+package manager:
 
 ```julia
 using Pkg
-Pkg.add(url = "https://github.com/jolars/Eunoia.jl")
+Pkg.add("Eunoia")
 ```
 
 ## Usage

@@ -14,11 +14,12 @@ package needs no Rust toolchain.
 
 ## Installation
 
-Until Eunoia is registered in the General registry, install it from GitHub:
+Eunoia is registered in the General registry, so install it with the Julia
+package manager:
 
 ```julia
 using Pkg
-Pkg.add(url = "https://github.com/jolars/Eunoia.jl")
+Pkg.add("Eunoia")
 ```
 
 ## Quick start
