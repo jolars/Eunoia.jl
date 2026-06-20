@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Gallery · Eunoia</title><meta name="title" content="Gallery · Eunoia"/><meta property="og:title" content="Gallery · Eunoia"/><meta property="twitter:title" content="Gallery · Eunoia"/><meta name="description" content="Documentation for Eunoia."/><meta property="og:description" content="Documentation for Eunoia."/><meta property="twitter:description" content="Documentation for Eunoia."/><script data-outdated-warner src="../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.050/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.8/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL=".."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../assets/documenter.js"></script><script src="../search_index.js"></script><script src="../siteinfo.js"></script><script src="../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-mocha.css" data-theme-name="catppuccin-mocha"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-macchiato.css" data-theme-name="catppuccin-macchiato"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-frappe.css" data-theme-name="catppuccin-frappe"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/catppuccin-latte.css" data-theme-name="catppuccin-latte"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../assets/themeswap.js"></script><link href="../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../"><img src="../assets/logo.svg" alt="Eunoia logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../">Eunoia</a></span></div><button class="docs-search-query input is-rounded is-small is-clickable my-2 mx-auto py-1 px-2" id="documenter-search-query">Search docs (Ctrl + /)</button><ul class="docs-menu"><li><a class="tocitem" href="../">Home</a></li><li class="is-active"><a class="tocitem" href>Gallery</a><ul class="internal"><li><a class="tocitem" href="#Euler-diagrams"><span>Euler diagrams</span></a></li><li><a class="tocitem" href="#Styling-and-the-complement"><span>Styling and the complement</span></a></li><li><a class="tocitem" href="#Venn-diagrams"><span>Venn diagrams</span></a></li></ul></li><li><a class="tocitem" href="../api/">API Reference</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><a class="docs-sidebar-button docs-navbar-link fa-solid fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a><nav class="breadcrumb"><ul class="is-hidden-mobile"><li class="is-active"><a href>Gallery</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Gallery</a></li></ul></nav><div class="docs-right"><a class="docs-navbar-link" href="https://github.com/jolars/Eunoia.jl" title="View the repository on GitHub"><span class="docs-icon fa-brands"></span><span class="docs-label is-hidden-touch">GitHub</span></a><a class="docs-navbar-link" href="https://github.com/jolars/Eunoia.jl/blob/main/docs/src/gallery.md" title="Edit source on GitHub"><span class="docs-icon fa-solid"></span></a><a class="docs-settings-button docs-navbar-link fa-solid fa-gear" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-article-toggle-button fa-solid fa-chevron-up" id="documenter-article-toggle-button" href="javascript:;" title="Collapse all docstrings"></a></div></header><article class="content" id="documenter-page"><h1 id="A-gallery-of-Euler-and-Venn-diagrams"><a class="docs-heading-anchor" href="#A-gallery-of-Euler-and-Venn-diagrams">A gallery of Euler and Venn diagrams</a><a id="A-gallery-of-Euler-and-Venn-diagrams-1"></a><a class="docs-heading-anchor-permalink" href="#A-gallery-of-Euler-and-Venn-diagrams" title="Permalink"></a></h1><p>This page is a gallery of Euler and Venn diagrams and a showcase of the customization options available through <a href="../api/#Eunoia.eunoiaplot"><code>eunoiaplot</code></a>. It is the Julia counterpart to the <a href="https://jolars.github.io/eulerr/articles/gallery.html">eulerr gallery</a> and the <a href="https://jolars.github.io/eunoia-py/gallery.html">eunoia-py gallery</a>.</p><p>Rendering lives in a <a href="https://docs.makie.org">Makie</a> extension that loads once a backend is imported. Here we use <a href="https://docs.makie.org/stable/explanations/backends/cairomakie">CairoMakie</a>, a software backend that needs no display.</p><pre><code class="language-julia hljs">using Eunoia, CairoMakie
+CairoMakie.activate!(type = &quot;png&quot;) # raster output for the gallery</code></pre><p>The styling keywords (<code>colors</code>, <code>fills</code>, <code>edges</code>, <code>labels</code>, <code>quantities</code>, <code>legend</code>, <code>complement</code>) mirror the Python API, but their <em>values</em> are <a href="https://docs.makie.org">Makie</a> attributes. A matplotlib style dict like <code>{&quot;linestyle&quot;: &quot;--&quot;}</code> becomes <code>Dict(:linestyle =&gt; :dash)</code>, a fill&#39;s <code>&quot;facecolor&quot;</code> becomes <code>:color</code>, and so on. A <em>uniform</em> style is a <code>Dict</code> with <code>Symbol</code> keys; a per-set or per-region map is a <code>Dict</code> keyed by name whose values are style collections (a <code>Dict</code> or a <code>(; key = value)</code> named tuple).</p><h2 id="Euler-diagrams"><a class="docs-heading-anchor" href="#Euler-diagrams">Euler diagrams</a><a id="Euler-diagrams-1"></a><a class="docs-heading-anchor-permalink" href="#Euler-diagrams" title="Permalink"></a></h2><h3 id="Uniform-intersections"><a class="docs-heading-anchor" href="#Uniform-intersections">Uniform intersections</a><a id="Uniform-intersections-1"></a><a class="docs-heading-anchor-permalink" href="#Uniform-intersections" title="Permalink"></a></h3><p>Here we use squares instead of the default circles.</p><pre><code class="language-julia hljs">fit = euler(
+    Dict(
+        &quot;A&quot; =&gt; 10,
+        &quot;B&quot; =&gt; 10,
+        &quot;C&quot; =&gt; 10,
+        &quot;A&amp;B&quot; =&gt; 4,
+        &quot;A&amp;C&quot; =&gt; 4,
+        &quot;B&amp;C&quot; =&gt; 4,
+        &quot;A&amp;B&amp;C&quot; =&gt; 2,
+    );
+    shape = &quot;square&quot;,
+)
+eunoiaplot(fit)</code></pre><img src="e4c8ba84.png" alt="Example block output"/><h3 id="Disjoint-sets"><a class="docs-heading-anchor" href="#Disjoint-sets">Disjoint sets</a><a id="Disjoint-sets-1"></a><a class="docs-heading-anchor-permalink" href="#Disjoint-sets" title="Permalink"></a></h3><p>Rename the sets simply by choosing the dictionary keys. A flat <code>edges</code> style is applied to every outline.</p><pre><code class="language-julia hljs">fit = euler(Dict(&quot;Tom&quot; =&gt; 1, &quot;Greg&quot; =&gt; 1, &quot;Alberta&quot; =&gt; 1))
+eunoiaplot(fit; edges = Dict(:linestyle =&gt; :dash))</code></pre><img src="3c2ddab5.png" alt="Example block output"/><p>To style each outline independently, pass <code>edges</code> as a <code>Dict</code> keyed by set name (each value a collection of <code>lines!</code> keywords) or as a vector of such collections, one per set in shape order — mirroring how <code>colors</code> accepts a per-set <code>Dict</code>.</p><pre><code class="language-julia hljs">fit = euler(Dict(&quot;Tom&quot; =&gt; 1, &quot;Greg&quot; =&gt; 1, &quot;Alberta&quot; =&gt; 1))
+eunoiaplot(
+    fit;
+    edges = Dict(
+        &quot;Tom&quot; =&gt; (; linestyle = :dash, linewidth = 2),
+        &quot;Greg&quot; =&gt; (; linestyle = :dot),
+    ),
+)</code></pre><img src="5df09941.png" alt="Example block output"/><h3 id="A-set-contained-in-the-intersection-of-two-sets"><a class="docs-heading-anchor" href="#A-set-contained-in-the-intersection-of-two-sets">A set contained in the intersection of two sets</a><a id="A-set-contained-in-the-intersection-of-two-sets-1"></a><a class="docs-heading-anchor-permalink" href="#A-set-contained-in-the-intersection-of-two-sets" title="Permalink"></a></h3><pre><code class="language-julia hljs">fit = euler(
+    Dict(
+        &quot;A&quot; =&gt; 15,
+        &quot;B&quot; =&gt; 15,
+        &quot;C&quot; =&gt; 0,
+        &quot;A&amp;B&quot; =&gt; 3,
+        &quot;A&amp;C&quot; =&gt; 0,
+        &quot;B&amp;C&quot; =&gt; 0,
+        &quot;A&amp;B&amp;C&quot; =&gt; 3,
+    ),
+)
+eunoiaplot(
+    fit;
+    colors = [&quot;black&quot;, &quot;cyan&quot;, &quot;orange&quot;],
+    edges = Dict(:color =&gt; :white, :linewidth =&gt; 2),
+)</code></pre><img src="fd741457.png" alt="Example block output"/><h3 id="Two-sets-intersecting-inside-a-third"><a class="docs-heading-anchor" href="#Two-sets-intersecting-inside-a-third">Two sets intersecting inside a third</a><a id="Two-sets-intersecting-inside-a-third-1"></a><a class="docs-heading-anchor-permalink" href="#Two-sets-intersecting-inside-a-third" title="Permalink"></a></h3><p>Here we override individual region fills with per-region <code>fills</code> styles.</p><pre><code class="language-julia hljs">fit = euler(
+    Dict(
+        &quot;A&quot; =&gt; 15,
+        &quot;B&quot; =&gt; 0,
+        &quot;C&quot; =&gt; 0,
+        &quot;A&amp;B&quot; =&gt; 3,
+        &quot;A&amp;C&quot; =&gt; 3,
+        &quot;B&amp;C&quot; =&gt; 0,
+        &quot;A&amp;B&amp;C&quot; =&gt; 2,
+    ),
+)
+eunoiaplot(
+    fit;
+    fills = Dict(
+        &quot;A&amp;B&amp;C&quot; =&gt; (; color = :orange),
+        &quot;A&amp;B&quot; =&gt; (; color = :lightblue),
+        &quot;A&amp;C&quot; =&gt; (; color = :lightsalmon),
+    ),
+)</code></pre><img src="3cbf7fb7.png" alt="Example block output"/><h3 id="Difficult-set-(for-circles!)"><a class="docs-heading-anchor" href="#Difficult-set-(for-circles!)">Difficult set (for circles!)</a><a id="Difficult-set-(for-circles!)-1"></a><a class="docs-heading-anchor-permalink" href="#Difficult-set-(for-circles!)" title="Permalink"></a></h3><p>This relationship cannot be drawn exactly with circles but works well with ellipses.</p><pre><code class="language-julia hljs">fit = euler(
+    Dict(&quot;A&quot; =&gt; 7, &quot;B&quot; =&gt; 6, &quot;C&quot; =&gt; 0, &quot;A&amp;B&quot; =&gt; 0, &quot;A&amp;C&quot; =&gt; 1, &quot;B&amp;C&quot; =&gt; 1, &quot;A&amp;B&amp;C&quot; =&gt; 2);
+    shape = &quot;ellipse&quot;,
+)
+eunoiaplot(fit; quantities = true)</code></pre><img src="1b6f4c5f.png" alt="Example block output"/><h3 id="Russian-doll"><a class="docs-heading-anchor" href="#Russian-doll">Russian doll</a><a id="Russian-doll-1"></a><a class="docs-heading-anchor-permalink" href="#Russian-doll" title="Permalink"></a></h3><p>Sets intersecting inside other sets.</p><pre><code class="language-julia hljs">fit = euler(
+    Dict(
+        &quot;A&quot; =&gt; 15,
+        &quot;B&quot; =&gt; 0,
+        &quot;C&quot; =&gt; 0,
+        &quot;A&amp;B&quot; =&gt; 10,
+        &quot;A&amp;C&quot; =&gt; 0,
+        &quot;B&amp;C&quot; =&gt; 0,
+        &quot;A&amp;B&amp;C&quot; =&gt; 5,
+    ),
+)
+eunoiaplot(fit)</code></pre><img src="d6dfb209.png" alt="Example block output"/><h3 id="Wilkinson-set-relationship"><a class="docs-heading-anchor" href="#Wilkinson-set-relationship">Wilkinson set relationship</a><a id="Wilkinson-set-relationship-1"></a><a class="docs-heading-anchor-permalink" href="#Wilkinson-set-relationship" title="Permalink"></a></h3><p>This set relationship is taken from Wilkinson et al. It works best with ellipses. We show the <em>fitted</em> values rather than the requested ones.</p><pre><code class="language-julia hljs">fit = euler(
+    Dict(
+        &quot;A&quot; =&gt; 4,
+        &quot;B&quot; =&gt; 6,
+        &quot;C&quot; =&gt; 3,
+        &quot;D&quot; =&gt; 2,
+        &quot;E&quot; =&gt; 7,
+        &quot;F&quot; =&gt; 3,
+        &quot;A&amp;B&quot; =&gt; 2,
+        &quot;A&amp;F&quot; =&gt; 2,
+        &quot;B&amp;C&quot; =&gt; 2,
+        &quot;B&amp;D&quot; =&gt; 1,
+        &quot;B&amp;F&quot; =&gt; 2,
+        &quot;C&amp;D&quot; =&gt; 1,
+        &quot;D&amp;E&quot; =&gt; 1,
+        &quot;E&amp;F&quot; =&gt; 1,
+        &quot;A&amp;B&amp;F&quot; =&gt; 1,
+        &quot;B&amp;C&amp;D&quot; =&gt; 1,
+    );
+    shape = &quot;ellipse&quot;,
+)
+eunoiaplot(fit; quantities = &quot;fitted&quot;, edges = Dict(:linestyle =&gt; :dot))</code></pre><img src="49116fc8.png" alt="Example block output"/><h3 id="Gene-set"><a class="docs-heading-anchor" href="#Gene-set">Gene set</a><a id="Gene-set-1"></a><a class="docs-heading-anchor-permalink" href="#Gene-set" title="Permalink"></a></h3><pre><code class="language-julia hljs">fit = euler(
+    Dict(
+        &quot;SE&quot; =&gt; 13,
+        &quot;Treat&quot; =&gt; 28,
+        &quot;Anti-CCP&quot; =&gt; 101,
+        &quot;DAS28&quot; =&gt; 91,
+        &quot;SE&amp;Treat&quot; =&gt; 1,
+        &quot;SE&amp;DAS28&quot; =&gt; 14,
+        &quot;Treat&amp;Anti-CCP&quot; =&gt; 6,
+        &quot;SE&amp;Anti-CCP&amp;DAS28&quot; =&gt; 1,
+    ),
+)
+eunoiaplot(fit; quantities = true)</code></pre><img src="f4447c02.png" alt="Example block output"/><h3 id="Three-sets-intersecting-inside-a-fourth"><a class="docs-heading-anchor" href="#Three-sets-intersecting-inside-a-fourth">Three sets intersecting inside a fourth</a><a id="Three-sets-intersecting-inside-a-fourth-1"></a><a class="docs-heading-anchor-permalink" href="#Three-sets-intersecting-inside-a-fourth" title="Permalink"></a></h3><pre><code class="language-julia hljs">fit = euler(
+    Dict(
+        &quot;A&quot; =&gt; 30,
+        &quot;A&amp;B&quot; =&gt; 3,
+        &quot;A&amp;C&quot; =&gt; 3,
+        &quot;A&amp;D&quot; =&gt; 3,
+        &quot;A&amp;B&amp;C&quot; =&gt; 0.4,
+        &quot;A&amp;B&amp;D&quot; =&gt; 0.4,
+        &quot;A&amp;C&amp;D&quot; =&gt; 0.4,
+        &quot;A&amp;B&amp;C&amp;D&quot; =&gt; 1,
+    ),
+)
+eunoiaplot(fit)</code></pre><img src="8dc11b24.png" alt="Example block output"/><h3 id="eulerAPE-combination"><a class="docs-heading-anchor" href="#eulerAPE-combination">eulerAPE combination</a><a id="eulerAPE-combination-1"></a><a class="docs-heading-anchor-permalink" href="#eulerAPE-combination" title="Permalink"></a></h3><p>A combination taken from the eulerAPE article, fit with ellipses.</p><pre><code class="language-julia hljs">fit = euler(
+    Dict(
+        &quot;a&quot; =&gt; 3491,
+        &quot;b&quot; =&gt; 3409,
+        &quot;c&quot; =&gt; 3503,
+        &quot;a&amp;b&quot; =&gt; 120,
+        &quot;a&amp;c&quot; =&gt; 114,
+        &quot;b&amp;c&quot; =&gt; 132,
+        &quot;a&amp;b&amp;c&quot; =&gt; 126,
+    );
+    shape = &quot;ellipse&quot;,
+)
+eunoiaplot(fit)</code></pre><img src="82c29ba7.png" alt="Example block output"/><h3 id="Four-uniform-interactions"><a class="docs-heading-anchor" href="#Four-uniform-interactions">Four uniform interactions</a><a id="Four-uniform-interactions-1"></a><a class="docs-heading-anchor-permalink" href="#Four-uniform-interactions" title="Permalink"></a></h3><p>This time we fit the diagram using rectangles.</p><pre><code class="language-julia hljs">fit = euler(
+    Dict(
+        &quot;Frodo&quot; =&gt; 10,
+        &quot;Sam&quot; =&gt; 10,
+        &quot;Merry&quot; =&gt; 10,
+        &quot;Pippin&quot; =&gt; 10,
+        &quot;Frodo&amp;Sam&quot; =&gt; 3,
+        &quot;Frodo&amp;Merry&quot; =&gt; 3,
+        &quot;Frodo&amp;Pippin&quot; =&gt; 0,
+        &quot;Sam&amp;Merry&quot; =&gt; 0,
+        &quot;Sam&amp;Pippin&quot; =&gt; 3,
+        &quot;Merry&amp;Pippin&quot; =&gt; 3,
+        &quot;Frodo&amp;Sam&amp;Merry&quot; =&gt; 1,
+        &quot;Frodo&amp;Sam&amp;Pippin&quot; =&gt; 1,
+        &quot;Frodo&amp;Merry&amp;Pippin&quot; =&gt; 1,
+        &quot;Sam&amp;Merry&amp;Pippin&quot; =&gt; 1,
+        &quot;Frodo&amp;Sam&amp;Merry&amp;Pippin&quot; =&gt; 1,
+    );
+    shape = &quot;rectangle&quot;,
+)
+eunoiaplot(fit)</code></pre><img src="9bc54b5a.png" alt="Example block output"/><h3 id="Two-circles-intersecting-completely"><a class="docs-heading-anchor" href="#Two-circles-intersecting-completely">Two circles intersecting completely</a><a id="Two-circles-intersecting-completely-1"></a><a class="docs-heading-anchor-permalink" href="#Two-circles-intersecting-completely" title="Permalink"></a></h3><pre><code class="language-julia hljs">fit = euler(Dict(&quot;A&quot; =&gt; 0, &quot;B&quot; =&gt; 0, &quot;A&amp;B&quot; =&gt; 10))
+eunoiaplot(fit)</code></pre><img src="61866f3e.png" alt="Example block output"/><h2 id="Styling-and-the-complement"><a class="docs-heading-anchor" href="#Styling-and-the-complement">Styling and the complement</a><a id="Styling-and-the-complement-1"></a><a class="docs-heading-anchor-permalink" href="#Styling-and-the-complement" title="Permalink"></a></h2><h3 id="A-universe-(complement)-box"><a class="docs-heading-anchor" href="#A-universe-(complement)-box">A universe (complement) box</a><a id="A-universe-(complement)-box-1"></a><a class="docs-heading-anchor-permalink" href="#A-universe-(complement)-box" title="Permalink"></a></h3><p>Pass <code>complement</code> to <a href="../api/#Eunoia.euler-Tuple{AbstractDict}"><code>euler</code></a> to reserve area outside every set; it comes back as a container that <a href="../api/#Eunoia.eunoiaplot"><code>eunoiaplot</code></a> draws behind everything. The <code>complement</code> plot keyword styles that box.</p><pre><code class="language-julia hljs">fit = euler(Dict(&quot;A&quot; =&gt; 10, &quot;B&quot; =&gt; 8, &quot;A&amp;B&quot; =&gt; 4); complement = 20)
+eunoiaplot(fit; complement = Dict(:color =&gt; &quot;#eeeeee&quot;), quantities = true)</code></pre><img src="9b487678.png" alt="Example block output"/><h3 id="Colors-as-a-sequence-or-a-mapping"><a class="docs-heading-anchor" href="#Colors-as-a-sequence-or-a-mapping">Colors as a sequence or a mapping</a><a id="Colors-as-a-sequence-or-a-mapping-1"></a><a class="docs-heading-anchor-permalink" href="#Colors-as-a-sequence-or-a-mapping" title="Permalink"></a></h3><p><code>colors</code> accepts either a vector (one per set, in fit order) or a mapping from set name to color.</p><pre><code class="language-julia hljs">fit = euler(
+    Dict(&quot;A&quot; =&gt; 10, &quot;B&quot; =&gt; 7, &quot;C&quot; =&gt; 8, &quot;A&amp;B&quot; =&gt; 3, &quot;A&amp;C&quot; =&gt; 4, &quot;B&amp;C&quot; =&gt; 2, &quot;A&amp;B&amp;C&quot; =&gt; 1),
+)
+eunoiaplot(fit; colors = Dict(&quot;A&quot; =&gt; &quot;#e41a1c&quot;, &quot;B&quot; =&gt; &quot;#377eb8&quot;, &quot;C&quot; =&gt; &quot;#4daf4a&quot;))</code></pre><img src="89c8344e.png" alt="Example block output"/><h3 id="A-legend-instead-of-inline-labels"><a class="docs-heading-anchor" href="#A-legend-instead-of-inline-labels">A legend instead of inline labels</a><a id="A-legend-instead-of-inline-labels-1"></a><a class="docs-heading-anchor-permalink" href="#A-legend-instead-of-inline-labels" title="Permalink"></a></h3><p>When sets are small or crowded their inline labels can overlap. Passing <code>legend = true</code> moves the set names into a color-keyed legend and turns the inline labels off by default (pass <code>labels = true</code> to keep both). A <code>Dict</code> or named tuple is forwarded to Makie&#39;s <code>Legend</code>, so you can control its title and appearance.</p><pre><code class="language-julia hljs">fit = euler(
+    Dict(&quot;A&quot; =&gt; 10, &quot;B&quot; =&gt; 7, &quot;C&quot; =&gt; 8, &quot;A&amp;B&quot; =&gt; 3, &quot;A&amp;C&quot; =&gt; 4, &quot;B&amp;C&quot; =&gt; 2, &quot;A&amp;B&amp;C&quot; =&gt; 1),
+)
+eunoiaplot(fit; legend = Dict(:title =&gt; &quot;Sets&quot;))</code></pre><img src="3627f250.png" alt="Example block output"/><h3 id="Custom-label-text-and-style"><a class="docs-heading-anchor" href="#Custom-label-text-and-style">Custom label text and style</a><a id="Custom-label-text-and-style-1"></a><a class="docs-heading-anchor-permalink" href="#Custom-label-text-and-style" title="Permalink"></a></h3><p><code>labels</code> can be a <code>Dict</code> for per-set control. Map a set name to a replacement string, to a collection of <code>text!</code> keywords (with an optional <code>:text</code> key for custom text), or to <code>nothing</code>/<code>false</code> to hide that set&#39;s label. A style <code>Dict</code> whose keys are <em>not</em> set names — e.g. <code>Dict(:fontsize =&gt; 14)</code> — is a uniform style applied to every label instead.</p><pre><code class="language-julia hljs">fit = euler(Dict(&quot;alpha&quot; =&gt; 10, &quot;beta&quot; =&gt; 7, &quot;alpha&amp;beta&quot; =&gt; 3))
+eunoiaplot(
+    fit;
+    labels = Dict(
+        &quot;alpha&quot; =&gt; (; text = &quot;α&quot;, fontsize = 22),
+        &quot;beta&quot; =&gt; (; text = &quot;β&quot;, fontsize = 22, color = :crimson),
+    ),
+)</code></pre><img src="d01e05bf.png" alt="Example block output"/><h3 id="Original-versus-fitted-quantities"><a class="docs-heading-anchor" href="#Original-versus-fitted-quantities">Original versus fitted quantities</a><a id="Original-versus-fitted-quantities-1"></a><a class="docs-heading-anchor-permalink" href="#Original-versus-fitted-quantities" title="Permalink"></a></h3><p>Drawing into axes we create ourselves lets us place two diagrams side by side to compare the requested values against what the layout achieved. Each panel is an <code>Axis</code> with <code>DataAspect()</code>; <a href="../api/#Eunoia.eunoiaplot!"><code>eunoiaplot!</code></a> draws into it without touching decorations.</p><pre><code class="language-julia hljs">fit = euler(
+    Dict(&quot;A&quot; =&gt; 7, &quot;B&quot; =&gt; 6, &quot;A&amp;C&quot; =&gt; 1, &quot;B&amp;C&quot; =&gt; 1, &quot;A&amp;B&amp;C&quot; =&gt; 2, &quot;C&quot; =&gt; 0);
+    shape = &quot;ellipse&quot;,
+)
+
+f = Figure(size = (900, 400))
+left = Axis(f[1, 1]; aspect = DataAspect(), title = &quot;original&quot;)
+right = Axis(f[1, 2]; aspect = DataAspect(), title = &quot;fitted&quot;)
+hidedecorations!(left); hidespines!(left)
+hidedecorations!(right); hidespines!(right)
+eunoiaplot!(left, fit; quantities = &quot;original&quot;)
+eunoiaplot!(right, fit; quantities = &quot;fitted&quot;)
+f</code></pre><img src="e9d7e618.png" alt="Example block output"/><h3 id="Counts-and-percentages"><a class="docs-heading-anchor" href="#Counts-and-percentages">Counts and percentages</a><a id="Counts-and-percentages-1"></a><a class="docs-heading-anchor-permalink" href="#Counts-and-percentages" title="Permalink"></a></h3><p><code>quantities</code> also chooses <em>how</em> to display each region. A string picks the display type—<code>&quot;counts&quot;</code> (the raw value, the default) or <code>&quot;percent&quot;</code> (the region&#39;s share of the total)—while a <code>Dict</code> or named tuple combines a type, a value source (<code>:source</code>), and text styling. Passing both types stacks the count above its percentage.</p><pre><code class="language-julia hljs">fit = euler(
+    Dict(
+        &quot;SE&quot; =&gt; 13,
+        &quot;Treat&quot; =&gt; 28,
+        &quot;Anti-CCP&quot; =&gt; 101,
+        &quot;DAS28&quot; =&gt; 91,
+        &quot;SE&amp;Treat&quot; =&gt; 1,
+        &quot;SE&amp;DAS28&quot; =&gt; 14,
+        &quot;Treat&amp;Anti-CCP&quot; =&gt; 6,
+        &quot;SE&amp;Anti-CCP&amp;DAS28&quot; =&gt; 1,
+    ),
+)
+eunoiaplot(fit; quantities = Dict(:type =&gt; [&quot;counts&quot;, &quot;percent&quot;], :fontsize =&gt; 8))</code></pre><img src="f0c8f4d2.png" alt="Example block output"/><h2 id="Venn-diagrams"><a class="docs-heading-anchor" href="#Venn-diagrams">Venn diagrams</a><a id="Venn-diagrams-1"></a><a class="docs-heading-anchor-permalink" href="#Venn-diagrams" title="Permalink"></a></h2><p><a href="../api/#Eunoia.venn-Tuple{Any}"><code>venn</code></a> draws topological (non-proportional) Venn diagrams. It accepts an integer count, a vector of names, or a mapping.</p><div class="admonition is-info" id="Note-282b57fe29e48ff8"><header class="admonition-header">Note<a class="admonition-anchor" href="#Note-282b57fe29e48ff8" title="Permalink"></a></header><div class="admonition-body"><p>Circle Venn diagrams are unsupported in the pinned Eunoia core and raise an error. Use ellipses (1–5 sets) or squares/rectangles (1–3 sets); the examples below pass <code>shape</code> explicitly.</p></div></div><h3 id="Two-and-three-sets"><a class="docs-heading-anchor" href="#Two-and-three-sets">Two and three sets</a><a id="Two-and-three-sets-1"></a><a class="docs-heading-anchor-permalink" href="#Two-and-three-sets" title="Permalink"></a></h3><pre><code class="language-julia hljs">f = Figure(size = (900, 400))
+left = Axis(f[1, 1]; aspect = DataAspect())
+right = Axis(f[1, 2]; aspect = DataAspect())
+hidedecorations!(left); hidespines!(left)
+hidedecorations!(right); hidespines!(right)
+eunoiaplot!(left, venn(2; shape = &quot;ellipse&quot;))
+eunoiaplot!(right, venn([&quot;A&quot;, &quot;B&quot;, &quot;C&quot;]; shape = &quot;ellipse&quot;))
+f</code></pre><img src="4695ee35.png" alt="Example block output"/><h3 id="Four-and-five-sets"><a class="docs-heading-anchor" href="#Four-and-five-sets">Four and five sets</a><a id="Four-and-five-sets-1"></a><a class="docs-heading-anchor-permalink" href="#Four-and-five-sets" title="Permalink"></a></h3><pre><code class="language-julia hljs">f = Figure(size = (900, 400))
+left = Axis(f[1, 1]; aspect = DataAspect())
+right = Axis(f[1, 2]; aspect = DataAspect())
+hidedecorations!(left); hidespines!(left)
+hidedecorations!(right); hidespines!(right)
+eunoiaplot!(left, venn(4; shape = &quot;ellipse&quot;))
+eunoiaplot!(right, venn(5; shape = &quot;ellipse&quot;))
+f</code></pre><img src="bc8ec662.png" alt="Example block output"/><h3 id="Squares"><a class="docs-heading-anchor" href="#Squares">Squares</a><a id="Squares-1"></a><a class="docs-heading-anchor-permalink" href="#Squares" title="Permalink"></a></h3><p>Venn diagrams of up to three sets can be drawn with square shapes instead of the default ellipse. Here the two sit side by side for the same three sets.</p><pre><code class="language-julia hljs">f = Figure(size = (900, 400))
+left = Axis(f[1, 1]; aspect = DataAspect(), title = &quot;ellipse&quot;)
+right = Axis(f[1, 2]; aspect = DataAspect(), title = &quot;square&quot;)
+hidedecorations!(left); hidespines!(left)
+hidedecorations!(right); hidespines!(right)
+eunoiaplot!(left, venn(3; shape = &quot;ellipse&quot;))
+eunoiaplot!(right, venn(3; shape = &quot;square&quot;))
+f</code></pre><img src="3fb380ab.png" alt="Example block output"/><p><code>&quot;rectangle&quot;</code> is accepted too (up to three sets), but the symmetric Venn layout renders it identically to a square — rectangles only differ from squares in area-proportional Euler diagrams.</p><h3 id="From-membership-lists"><a class="docs-heading-anchor" href="#From-membership-lists">From membership lists</a><a id="From-membership-lists-1"></a><a class="docs-heading-anchor-permalink" href="#From-membership-lists" title="Permalink"></a></h3><p><code>venn</code> accepts the same membership-list input as <code>euler</code>; it only needs the set names.</p><pre><code class="language-julia hljs">eunoiaplot(
+    venn(Dict(&quot;A&quot; =&gt; [&quot;x&quot;, &quot;y&quot;, &quot;z&quot;], &quot;B&quot; =&gt; [&quot;y&quot;, &quot;z&quot;, &quot;w&quot;], &quot;C&quot; =&gt; [&quot;z&quot;, &quot;w&quot;, &quot;q&quot;]);
+         shape = &quot;ellipse&quot;),
+)</code></pre><img src="110eb723.png" alt="Example block output"/></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../">« Home</a><a class="docs-footer-nextpage" href="../api/">API Reference »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.17.0 on <span class="colophon-date" title="Saturday 20 June 2026 11:41">Saturday 20 June 2026</span>. Using Julia version 1.12.6.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
