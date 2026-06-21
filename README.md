@@ -115,15 +115,14 @@ export EUNOIA_CAPI_LIB="$PWD/target/release/libeunoia_capi.so"  # .dylib on macO
 ## Ecosystem
 
 This package is the Python member of the [Eunoia](https://eunoia.bz) family. The
-same Rust core powers bindings in several languages:
+same Rust core powers bindings in several other languages:
 
   | Project                                            | Language             | Distribution                                        |
   | -------------------------------------------------- | -------------------- | --------------------------------------------------- |
-  | **Eunoia.jl** (this package)                       | Julia                |                                                     |
   | [Eunoia](https://github.com/jolars/eunoia)         | Rust (core)          | [crates.io](https://crates.io/crates/eunoia)        |
   | [@jolars/eunoia](https://github.com/jolars/eunoia) | JavaScript/TS (WASM) | [npm](https://www.npmjs.com/package/@jolars/eunoia) |
   | [Eunoia](https://github.com/jolars/eunoia-py)      | Python               | [PyPI](https://pypi.org/project/eunoia/)            |
-  | [eulerr](https://github.com/jolars/eulerr)         | R (original)         | [CRAN](https://cran.r-project.org/package=eulerr)   |
+  | [eulerr](https://github.com/jolars/eulerr)         | R                    | [CRAN](https://cran.r-project.org/package=eulerr)   |
 
 Narrative documentation for the whole family lives at
 [eunoia.bz/docs/](https://eunoia.bz/docs/); the Rust API reference is at
