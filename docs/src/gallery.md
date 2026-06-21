@@ -24,9 +24,9 @@ The styling keywords (`colors`, `fills`, `edges`, `labels`, `quantities`,
 `Symbol` keys; a per-set or per-region map is a `Dict` keyed by name whose values
 are style collections (a `Dict` or a `(; key = value)` named tuple).
 
-## Euler diagrams
+## Euler Diagrams
 
-### Uniform intersections
+### Uniform Intersections
 
 Here we use squares instead of the default circles.
 
@@ -46,7 +46,7 @@ fit = euler(
 eunoiaplot(fit)
 ```
 
-### Disjoint sets
+### Disjoint Sets
 
 Rename the sets simply by choosing the dictionary keys. A flat `edges` style is
 applied to every outline.
@@ -72,7 +72,7 @@ eunoiaplot(
 )
 ```
 
-### A set contained in the intersection of two sets
+### A Set Contained in the Intersection of Two Sets
 
 ```@example gallery
 fit = euler(
@@ -86,6 +86,7 @@ fit = euler(
         "A&B&C" => 3,
     ),
 )
+
 eunoiaplot(
     fit;
     colors = ["black", "cyan", "orange"],
@@ -93,7 +94,7 @@ eunoiaplot(
 )
 ```
 
-### Two sets intersecting inside a third
+### Two Sets Intersecting Inside a Third
 
 Here we override individual region fills with per-region `fills` styles.
 
@@ -109,6 +110,7 @@ fit = euler(
         "A&B&C" => 2,
     ),
 )
+
 eunoiaplot(
     fit;
     fills = Dict(
@@ -119,7 +121,7 @@ eunoiaplot(
 )
 ```
 
-### Difficult set (for circles!)
+### Difficult Set (For Circles!)
 
 This relationship cannot be drawn exactly with circles but works well with
 ellipses.
@@ -132,7 +134,7 @@ fit = euler(
 eunoiaplot(fit; quantities = true)
 ```
 
-### Russian doll
+### Russian Doll
 
 Sets intersecting inside other sets.
 
@@ -148,10 +150,11 @@ fit = euler(
         "A&B&C" => 5,
     ),
 )
+
 eunoiaplot(fit)
 ```
 
-### Wilkinson set relationship
+### Wilkinson Set Relationship
 
 This set relationship is taken from Wilkinson et al. It works best with
 ellipses. We show the *fitted* values rather than the requested ones.
@@ -178,10 +181,11 @@ fit = euler(
     );
     shape = "ellipse",
 )
+
 eunoiaplot(fit; quantities = "fitted", edges = Dict(:linestyle => :dot))
 ```
 
-### Gene set
+### Gene Set
 
 ```@example gallery
 fit = euler(
@@ -214,10 +218,11 @@ fit = euler(
         "A&B&C&D" => 1,
     ),
 )
+
 eunoiaplot(fit)
 ```
 
-### eulerAPE combination
+### eulerAPE Combination
 
 A combination taken from the eulerAPE article, fit with ellipses.
 
@@ -234,10 +239,11 @@ fit = euler(
     );
     shape = "ellipse",
 )
+
 eunoiaplot(fit)
 ```
 
-### Four uniform interactions
+### Four Uniform Interactions
 
 This time we fit the diagram using rectangles.
 
@@ -262,19 +268,20 @@ fit = euler(
     );
     shape = "rectangle",
 )
+
 eunoiaplot(fit)
 ```
 
-### Two circles intersecting completely
+### Two Circles Intersecting Completely
 
 ```@example gallery
 fit = euler(Dict("A" => 0, "B" => 0, "A&B" => 10))
 eunoiaplot(fit)
 ```
 
-## Styling and the complement
+## Styling and the Complement
 
-### A universe (complement) box
+### A Universe (Complement) Box
 
 Pass `complement` to [`euler`](@ref Eunoia.euler) to reserve area outside every
 set; it comes back as a container that [`eunoiaplot`](@ref Eunoia.eunoiaplot)
@@ -285,7 +292,7 @@ fit = euler(Dict("A" => 10, "B" => 8, "A&B" => 4); complement = 20)
 eunoiaplot(fit; complement = Dict(:color => "#eeeeee"), quantities = true)
 ```
 
-### Colors as a sequence or a mapping
+### Colors As a Sequence or a Mapping
 
 `colors` accepts either a vector (one per set, in fit order) or a mapping from
 set name to color.
@@ -294,10 +301,11 @@ set name to color.
 fit = euler(
     Dict("A" => 10, "B" => 7, "C" => 8, "A&B" => 3, "A&C" => 4, "B&C" => 2, "A&B&C" => 1),
 )
+
 eunoiaplot(fit; colors = Dict("A" => "#e41a1c", "B" => "#377eb8", "C" => "#4daf4a"))
 ```
 
-### A legend instead of inline labels
+### A Legend Instead of Inline Labels
 
 When sets are small or crowded their inline labels can overlap. Passing
 `legend = true` moves the set names into a color-keyed legend and turns the
@@ -331,7 +339,7 @@ eunoiaplot(
 )
 ```
 
-### Original versus fitted quantities
+### Original versus Fitted Quantities
 
 Drawing into axes we create ourselves lets us place two diagrams side by side to
 compare the requested values against what the layout achieved. Each panel is an
@@ -345,16 +353,20 @@ fit = euler(
 )
 
 f = Figure(size = (900, 400))
+
 left = Axis(f[1, 1]; aspect = DataAspect(), title = "original")
 right = Axis(f[1, 2]; aspect = DataAspect(), title = "fitted")
+
 hidedecorations!(left); hidespines!(left)
 hidedecorations!(right); hidespines!(right)
+
 eunoiaplot!(left, fit; quantities = "original")
 eunoiaplot!(right, fit; quantities = "fitted")
+
 f
 ```
 
-### Counts and percentages
+### Counts and Percentages
 
 `quantities` also chooses *how* to display each region. A string picks the
 display type—`"counts"` (the raw value, the default) or `"percent"` (the
@@ -375,10 +387,11 @@ fit = euler(
         "SE&Anti-CCP&DAS28" => 1,
     ),
 )
+
 eunoiaplot(fit; quantities = Dict(:type => ["counts", "percent"], :fontsize => 8))
 ```
 
-## Venn diagrams
+## Venn Diagrams
 
 [`venn`](@ref Eunoia.venn) draws topological (non-proportional) Venn diagrams.
 It accepts an integer count, a vector of names, or a mapping.
@@ -389,29 +402,37 @@ It accepts an integer count, a vector of names, or a mapping.
     error. Use ellipses (1–5 sets) or squares/rectangles (1–3 sets); the
     examples below pass `shape` explicitly.
 
-### Two and three sets
+### Two and Three Sets
 
 ```@example gallery
 f = Figure(size = (900, 400))
+
 left = Axis(f[1, 1]; aspect = DataAspect())
 right = Axis(f[1, 2]; aspect = DataAspect())
+
 hidedecorations!(left); hidespines!(left)
 hidedecorations!(right); hidespines!(right)
+
 eunoiaplot!(left, venn(2; shape = "ellipse"))
 eunoiaplot!(right, venn(["A", "B", "C"]; shape = "ellipse"))
+
 f
 ```
 
-### Four and five sets
+### Four and Five Sets
 
 ```@example gallery
 f = Figure(size = (900, 400))
+
 left = Axis(f[1, 1]; aspect = DataAspect())
 right = Axis(f[1, 2]; aspect = DataAspect())
+
 hidedecorations!(left); hidespines!(left)
 hidedecorations!(right); hidespines!(right)
+
 eunoiaplot!(left, venn(4; shape = "ellipse"))
 eunoiaplot!(right, venn(5; shape = "ellipse"))
+
 f
 ```
 
@@ -422,20 +443,24 @@ default ellipse. Here the two sit side by side for the same three sets.
 
 ```@example gallery
 f = Figure(size = (900, 400))
+
 left = Axis(f[1, 1]; aspect = DataAspect(), title = "ellipse")
 right = Axis(f[1, 2]; aspect = DataAspect(), title = "square")
+
 hidedecorations!(left); hidespines!(left)
 hidedecorations!(right); hidespines!(right)
+
 eunoiaplot!(left, venn(3; shape = "ellipse"))
 eunoiaplot!(right, venn(3; shape = "square"))
+
 f
 ```
 
 `"rectangle"` is accepted too (up to three sets), but the symmetric Venn layout
-renders it identically to a square — rectangles only differ from squares in
+renders it identically to a square. Rectangles only differ from squares in
 area-proportional Euler diagrams.
 
-### From membership lists
+### From Membership Lists
 
 `venn` accepts the same membership-list input as `euler`; it only needs the set
 names.
