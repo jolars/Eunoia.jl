@@ -1,67 +1,67 @@
 [[eunoia]]
 arch = "x86_64"
-git-tree-sha1 = "887d3666cc5c5d0b6471bbcca819a4c857e4d51f"
+git-tree-sha1 = "637c3d901a58c916524197354d5de104fc579a18"
 lazy = true
 libc = "glibc"
 os = "linux"
 
     [[eunoia.download]]
-    sha256 = "de95ac074c902700481e136b3f8be06d6491d7c293ddd787533257ada73b680a"
-    url = "https://github.com/jolars/eunoia/releases/download/v1.4.0/libeunoia_capi-x86_64-linux-gnu.tar.gz"
+    sha256 = "6d2a0c74cadcbe6564eefbfc27f8a2b7599eb6c67e17df6c1f04e3f50b6bdeb1"
+    url = "https://github.com/jolars/eunoia/releases/download/v1.5.0/libeunoia_capi-x86_64-linux-gnu.tar.gz"
 [[eunoia]]
 arch = "aarch64"
-git-tree-sha1 = "88badfef404ed5f9e7a950a15945787693151c1e"
+git-tree-sha1 = "e8284dc465a27f4b2192bccd05d06ddeee8cec1d"
 lazy = true
 libc = "glibc"
 os = "linux"
 
     [[eunoia.download]]
-    sha256 = "8d53edcdae5e38308dd749f32fde874e52ab16cff7e570e53d1b26ff6490ea2e"
-    url = "https://github.com/jolars/eunoia/releases/download/v1.4.0/libeunoia_capi-aarch64-linux-gnu.tar.gz"
+    sha256 = "405d206d0940cc5733b8db9c773c84552b538e6f290340a84d09d8861b9a8ee3"
+    url = "https://github.com/jolars/eunoia/releases/download/v1.5.0/libeunoia_capi-aarch64-linux-gnu.tar.gz"
 [[eunoia]]
 arch = "x86_64"
-git-tree-sha1 = "701c1d7b8b1239e226647cc0900a1c88803837f9"
+git-tree-sha1 = "c8771a70c8821bf175340fc0f841ab96f8b557ce"
 lazy = true
 libc = "musl"
 os = "linux"
 
     [[eunoia.download]]
-    sha256 = "b3452213e73b952c5304974c57f615a8f587ec02a0be20739842e259e94fdc5a"
-    url = "https://github.com/jolars/eunoia/releases/download/v1.4.0/libeunoia_capi-x86_64-linux-musl.tar.gz"
+    sha256 = "7719b6011f32a7ae9c51c39e5676e368e45548347f768e449906acc65acad0b1"
+    url = "https://github.com/jolars/eunoia/releases/download/v1.5.0/libeunoia_capi-x86_64-linux-musl.tar.gz"
 [[eunoia]]
 arch = "aarch64"
-git-tree-sha1 = "7d38241d83bcc645ab7ed63c25b723f85a9b4acd"
+git-tree-sha1 = "1893a76ec167bc24a90d4f9a9913827e6d193b85"
 lazy = true
 libc = "musl"
 os = "linux"
 
     [[eunoia.download]]
-    sha256 = "2a2f68fb5853aaa23e96c973fba37a1ec9c8943d9750a6eefeeea4c11f3adc17"
-    url = "https://github.com/jolars/eunoia/releases/download/v1.4.0/libeunoia_capi-aarch64-linux-musl.tar.gz"
+    sha256 = "8d84b9aba374a4d3c4427999c42434de9479325b3075d9e9202f18d6fe9f4eb8"
+    url = "https://github.com/jolars/eunoia/releases/download/v1.5.0/libeunoia_capi-aarch64-linux-musl.tar.gz"
 [[eunoia]]
 arch = "x86_64"
-git-tree-sha1 = "0272b5f07ef69180736b3c7e39a17ccd9909540f"
+git-tree-sha1 = "19e99bb226489e639dfaf62fd79b8f01461e9513"
 lazy = true
 os = "macos"
 
     [[eunoia.download]]
-    sha256 = "3f4722e769dc763fd2d3b512e6b1d6d8c6823ac67e7cb90ead91cacec68a3344"
-    url = "https://github.com/jolars/eunoia/releases/download/v1.4.0/libeunoia_capi-x86_64-apple-darwin.tar.gz"
+    sha256 = "4f0deca52457b81c1ad9f6521b13fc9b13db84c24cf93e3eb66fe3451ea9a664"
+    url = "https://github.com/jolars/eunoia/releases/download/v1.5.0/libeunoia_capi-x86_64-apple-darwin.tar.gz"
 [[eunoia]]
 arch = "aarch64"
-git-tree-sha1 = "bab4e96898e1c086bd1da03d1dab1d84e708c3ce"
+git-tree-sha1 = "2c206a9eb8de0f879fbd4ca358835f4bd6b22d2b"
 lazy = true
 os = "macos"
 
     [[eunoia.download]]
-    sha256 = "d8cd050cb59fa07310178ba399d3d0a2fa06e97d9bc003fa98d6e9b92eb84f92"
-    url = "https://github.com/jolars/eunoia/releases/download/v1.4.0/libeunoia_capi-aarch64-apple-darwin.tar.gz"
+    sha256 = "84ca4e6224df7754409d85c4a3aaa68013576de99f59b51ddfd1ae32768cfd4b"
+    url = "https://github.com/jolars/eunoia/releases/download/v1.5.0/libeunoia_capi-aarch64-apple-darwin.tar.gz"
 [[eunoia]]
 arch = "x86_64"
-git-tree-sha1 = "b8a13cd127bcbbb3ad5bbeaed7836df157dcbba7"
+git-tree-sha1 = "f3785a1b969039ba2a53540c166b1b26f9a9d41c"
 lazy = true
 os = "windows"
 
     [[eunoia.download]]
-    sha256 = "7cb4ac5ab3beff953f149348a47df78098440ce7d7c2c5f6700ab0a9e414187f"
-    url = "https://github.com/jolars/eunoia/releases/download/v1.4.0/libeunoia_capi-x86_64-w64-mingw32.tar.gz"
+    sha256 = "a06ca3000f47b74fe33891586551d177665cb059dab643662dfb921121063354"
+    url = "https://github.com/jolars/eunoia/releases/download/v1.5.0/libeunoia_capi-x86_64-w64-mingw32.tar.gz"
