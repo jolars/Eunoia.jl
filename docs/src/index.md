@@ -5,8 +5,9 @@ Area-proportional **Euler and Venn diagrams** for Julia.
 Eunoia fits and draws diagrams in which the areas of overlapping shapes
 (circles, ellipses, squares, or rectangles) are made to match a set of input
 quantities as closely as possible. It is the Julia binding for
-[eunoia](https://github.com/jolars/eunoia), a Rust library, and a sister package
-to the Python binding [eunoia-py](https://github.com/jolars/eunoia-py).
+[eunoia](https://github.com/jolars/eunoia), a Rust library, and a sister
+package to the R ([eulerr](https://github.com/jolars/eulerr)) and Python
+([eunoia-py](https://github.com/jolars/eunoia-py)) bindings.
 
 The fitting engine ships as a native library reached through a small C ABI; its
 binaries are delivered as a lazily-downloaded Julia artifact, so installing the
