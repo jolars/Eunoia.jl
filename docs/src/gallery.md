@@ -341,10 +341,12 @@ eunoiaplot(
 
 ### Original versus Fitted Quantities
 
-Drawing into axes we create ourselves lets us place two diagrams side by side to
-compare the requested values against what the layout achieved. Each panel is an
-`Axis` with `DataAspect()`; [`eunoiaplot!`](@ref Eunoia.eunoiaplot!) draws into
-it without touching decorations.
+To place two diagrams side by side and compare the requested values against what
+the layout achieved, pass a figure layout cell to
+[`eunoiaplot`](@ref Eunoia.eunoiaplot) — `eunoiaplot(f[1, 1], fit)` creates a
+diagram-configured panel (equal aspect, hidden decorations) in that cell, so we
+don't build each `Axis` by hand. Per-panel options like a `title` go through
+`axis`.
 
 ```@example gallery
 fit = euler(
@@ -354,14 +356,8 @@ fit = euler(
 
 f = Figure(size = (900, 400))
 
-left = Axis(f[1, 1]; aspect = DataAspect(), title = "original")
-right = Axis(f[1, 2]; aspect = DataAspect(), title = "fitted")
-
-hidedecorations!(left); hidespines!(left)
-hidedecorations!(right); hidespines!(right)
-
-eunoiaplot!(left, fit; quantities = "original")
-eunoiaplot!(right, fit; quantities = "fitted")
+eunoiaplot(f[1, 1], fit; quantities = "original", axis = (; title = "original"))
+eunoiaplot(f[1, 2], fit; quantities = "fitted", axis = (; title = "fitted"))
 
 f
 ```
@@ -407,14 +403,8 @@ It accepts an integer count, a vector of names, or a mapping.
 ```@example gallery
 f = Figure(size = (900, 400))
 
-left = Axis(f[1, 1]; aspect = DataAspect())
-right = Axis(f[1, 2]; aspect = DataAspect())
-
-hidedecorations!(left); hidespines!(left)
-hidedecorations!(right); hidespines!(right)
-
-eunoiaplot!(left, venn(2; shape = "ellipse"))
-eunoiaplot!(right, venn(["A", "B", "C"]; shape = "ellipse"))
+eunoiaplot(f[1, 1], venn(2; shape = "ellipse"))
+eunoiaplot(f[1, 2], venn(["A", "B", "C"]; shape = "ellipse"))
 
 f
 ```
@@ -424,14 +414,8 @@ f
 ```@example gallery
 f = Figure(size = (900, 400))
 
-left = Axis(f[1, 1]; aspect = DataAspect())
-right = Axis(f[1, 2]; aspect = DataAspect())
-
-hidedecorations!(left); hidespines!(left)
-hidedecorations!(right); hidespines!(right)
-
-eunoiaplot!(left, venn(4; shape = "ellipse"))
-eunoiaplot!(right, venn(5; shape = "ellipse"))
+eunoiaplot(f[1, 1], venn(4; shape = "ellipse"))
+eunoiaplot(f[1, 2], venn(5; shape = "ellipse"))
 
 f
 ```
@@ -444,14 +428,8 @@ default ellipse. Here the two sit side by side for the same three sets.
 ```@example gallery
 f = Figure(size = (900, 400))
 
-left = Axis(f[1, 1]; aspect = DataAspect(), title = "ellipse")
-right = Axis(f[1, 2]; aspect = DataAspect(), title = "square")
-
-hidedecorations!(left); hidespines!(left)
-hidedecorations!(right); hidespines!(right)
-
-eunoiaplot!(left, venn(3; shape = "ellipse"))
-eunoiaplot!(right, venn(3; shape = "square"))
+eunoiaplot(f[1, 1], venn(3; shape = "ellipse"); axis = (; title = "ellipse"))
+eunoiaplot(f[1, 2], venn(3; shape = "square"); axis = (; title = "square"))
 
 f
 ```

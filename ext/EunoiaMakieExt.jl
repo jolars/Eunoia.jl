@@ -93,15 +93,34 @@ end
 # Public entry points (methods on the `Eunoia.eunoiaplot`/`!` stubs)
 # ---------------------------------------------------------------------------
 
+# Create an axis configured for diagram rendering (equal aspect, no decorations)
+# in the given figure cell. Shared by both `eunoiaplot` entry points.
+function _diagram_axis(gp; axis = (;))
+    ax = Axis(gp; aspect = DataAspect(), axis...)
+    hidedecorations!(ax)
+    hidespines!(ax)
+    return ax
+end
+
 function eunoiaplot(fit::AbstractEulerFit; figure = (;), axis = (;),
                     legend = false, kwargs...)
     f = Figure(; figure...)
-    ax = Axis(f[1, 1]; aspect = DataAspect(), axis...)
-    hidedecorations!(ax)
-    hidespines!(ax)
+    ax = _diagram_axis(f[1, 1]; axis = axis)
     p = eunoiaplot!(ax, fit; legend = legend, kwargs...)
     add_legend_if_requested!(f, fit, p, legend)
     return Makie.FigureAxisPlot(f, ax, p)
+end
+
+# Grid-position form: draw into a diagram-configured axis created in an existing
+# layout cell (`eunoiaplot(f[1, 2], fit)`), mirroring Makie's `plot(fig[i, j],
+# data)`. Returns a `Makie.AxisPlot`. No `figure`/`legend` here — the figure
+# exists already, and legend placement in a hand-built layout is the caller's to
+# decide (add a `Legend` yourself).
+function eunoiaplot(gp::Union{Makie.GridPosition,Makie.GridSubposition},
+                    fit::AbstractEulerFit; axis = (;), kwargs...)
+    ax = _diagram_axis(gp; axis = axis)
+    p = eunoiaplot!(ax, fit; kwargs...)
+    return Makie.AxisPlot(ax, p)
 end
 
 """

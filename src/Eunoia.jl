@@ -407,9 +407,18 @@ end
 """
     eunoiaplot(fit; colors, fills, edges, labels, quantities, legend, complement,
                fontsize=14, label_placement=true, leader_style=(;), figure=(;), axis=(;))
+    eunoiaplot(gridpos, fit; axis=(;), kwargs...)
 
 Render a fitted [`EulerFit`](@ref)/[`VennFit`](@ref) as a publication-ready Makie
 figure (equal aspect, no axis decorations), returning a `Makie.FigureAxisPlot`.
+
+The second form draws into a *layout cell* of an existing figure — e.g.
+`eunoiaplot(f[1, 2], fit)` — mirroring Makie's `plot(fig[i, j], data)`. It
+creates a diagram-configured axis (equal aspect, hidden decorations) in that cell
+and returns a `Makie.AxisPlot`. Use it to assemble multi-panel figures without
+configuring each axis by hand. It takes the same styling keywords (pass an axis
+`title` and the like through `axis = (; title = "…")`) but does not add a legend;
+add a `Legend` yourself if you want one.
 
 This requires a Makie backend to be loaded — the implementation lives in a
 package extension that activates on `using CairoMakie` (or `GLMakie`/`WGLMakie`).
@@ -464,6 +473,8 @@ function eunoiaplot! end
 # extension's more-specific methods once Makie is loaded.
 eunoiaplot(::AbstractEulerFit, args...; kwargs...) = error(
     "eunoiaplot requires a Makie backend; run `using CairoMakie` (or GLMakie) first.")
+# No no-backend fallback for the grid-position form: a `GridPosition` can only be
+# constructed from a `Figure`, which already requires a Makie backend.
 eunoiaplot!(::Any, ::AbstractEulerFit, args...; kwargs...) = error(
     "eunoiaplot! requires a Makie backend; run `using CairoMakie` (or GLMakie) first.")
 

@@ -318,6 +318,19 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
             @test npoly(p) >= 3
         end
 
+        @testset "draw into a layout cell" begin
+            f = Figure()
+            ap = eunoiaplot(f[1, 2], fit; axis=(; title="panel"))
+            @test ap isa MK.AxisPlot
+            @test ap.axis isa Axis
+            # The cell axis is diagram-configured, not a bare Axis.
+            @test ap.axis.aspect[] isa DataAspect
+            @test ap.axis.xticklabelsvisible[] == false
+            @test ap.axis.title[] == "panel"
+            @test npoly(ap.plot) >= 3
+            @test (MK.colorbuffer(f); true)
+        end
+
         @testset "ellipse / square / rectangle render" begin
             for shp in ("ellipse", "square", "rectangle")
                 p = eunoiaplot(euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0);
