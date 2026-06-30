@@ -272,6 +272,35 @@ fit = euler(
 eunoiaplot(fit)
 ```
 
+### Rotated Rectangles
+
+Rectangles can also be fit with a free rotation angle (`shape =
+"rotated_rectangle"`), which gives the optimizer an extra degree of freedom and
+suits the diagonal four-set arrangement well.
+
+```@example gallery
+fit = euler(
+    Dict(
+        "Frodo" => 10,
+        "Sam" => 10,
+        "Merry" => 10,
+        "Pippin" => 10,
+        "Frodo&Sam" => 3,
+        "Frodo&Merry" => 3,
+        "Sam&Pippin" => 3,
+        "Merry&Pippin" => 3,
+        "Frodo&Sam&Merry" => 1,
+        "Frodo&Sam&Pippin" => 1,
+        "Frodo&Merry&Pippin" => 1,
+        "Sam&Merry&Pippin" => 1,
+        "Frodo&Sam&Merry&Pippin" => 1,
+    );
+    shape = "rotated_rectangle",
+)
+
+eunoiaplot(fit)
+```
+
 ### Two Circles Intersecting Completely
 
 ```@example gallery
@@ -437,6 +466,27 @@ f
 `"rectangle"` is accepted too (up to three sets), but the symmetric Venn layout
 renders it identically to a square. Rectangles only differ from squares in
 area-proportional Euler diagrams.
+
+### Rotated Rectangles for Four Sets
+
+`"rotated_rectangle"` draws a four-set Venn diagram with rotated rectangles, an
+arrangement that ellipses cannot lay out symmetrically.
+
+```@example gallery
+eunoiaplot(venn(4; shape = "rotated_rectangle"))
+```
+
+### A Complement Box
+
+`venn` also takes a `complement` size, just like `euler`, reserving area outside
+every set as a "universe" frame around the diagram.
+
+```@example gallery
+eunoiaplot(
+    venn(3; shape = "ellipse", complement = 5);
+    complement = Dict(:color => "#eeeeee"),
+)
+```
 
 ### From Membership Lists
 

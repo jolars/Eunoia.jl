@@ -32,7 +32,8 @@ using JSON3
 using Printf
 
 export euler, venn, version, eunoiaplot, eunoiaplot!, place_labels
-export EulerFit, VennFit, Circle, Ellipse, Square, Rectangle, Point, Container
+export EulerFit, VennFit, Circle, Ellipse, Square, Rectangle, RotatedRectangle
+export Point, Container
 export LabelPlacement
 
 include("parse.jl")
@@ -138,7 +139,8 @@ Fit an area-proportional Euler diagram. `values` is one of:
 
 Keyword arguments:
 
-- `shape`: `"circle"` (default), `"ellipse"`, `"square"`, or `"rectangle"`.
+- `shape`: `"circle"` (default), `"ellipse"`, `"square"`, `"rectangle"`, or
+  `"rotated_rectangle"`.
 - `input_type`: `"exclusive"` (default; per-region areas) or `"inclusive"`
   (set sizes that include overlaps; the core converts internally and the
   reported `fitted_values`/`residuals` are reconstructed in the inclusive
@@ -164,7 +166,8 @@ tokens are rejected by the native core and surface as an error:
   ignored by the non-smooth losses.
 - `n_restarts`: number of randomly seeded restarts (default `10`).
 - `optimizer`: final-layout solver. One of `"levenberg_marquardt"`, `"lbfgs"`,
-  `"nelder_mead"`, `"trf"`, `"cmaes_lm"`, or `"cmaes_trf"` (default).
+  `"nelder_mead"`, `"mads"`, `"trf"`, `"cmaes"`, `"cmaes_lm"`, or `"cmaes_trf"`
+  (default).
 - `mds_solver`: initial-layout (MDS) solver, `"levenberg_marquardt"` (default) or
   `"lbfgs"`.
 - `initial_sampler`: restart-position sampler, `"uniform"` (default) or
@@ -272,7 +275,7 @@ function euler(values::AbstractDict; shape::AbstractString="circle",
 end
 
 """
-    venn(sets; shape="circle")
+    venn(sets; shape="circle", complement=nothing)
 
 Build a canonical Venn diagram. `sets` selects the set names, as one of:
 
@@ -282,20 +285,28 @@ Build a canonical Venn diagram. `sets` selects the set names, as one of:
   are extracted; values are ignored, since a Venn layout is non-proportional).
 
 The number of names selects the arrangement; `shape` is `"circle"` (n ≤ 3),
-`"ellipse"` (n ≤ 5), `"square"`, or `"rectangle"` (n ≤ 3).
+`"ellipse"` (n ≤ 5), `"square"`, `"rectangle"` (n ≤ 3), or `"rotated_rectangle"`
+(n ≤ 4).
+
+Pass `complement` to reserve that area outside every set; the fit then carries a
+`container` box (the "universe" frame) drawn behind the diagram, just as for
+[`euler`](@ref).
 
 ```julia
 venn(["A", "B", "C"]; shape="ellipse")
 venn(3)
+venn(4; shape="rotated_rectangle", complement=2)
 ```
 
 Returns a [`VennFit`](@ref): the same structure as [`EulerFit`](@ref), but the
 layout is topological, so `fitted_values` holds each region's geometric area and
 `original_values` is empty.
 """
-function venn(sets; shape::AbstractString="circle")
+function venn(sets; shape::AbstractString="circle",
+              complement::Union{Nothing,Real}=nothing)
     names = _resolve_names(sets)
-    payload = Dict("names" => names, "shape" => shape)
+    payload = Dict{String,Any}("names" => names, "shape" => shape)
+    complement === nothing || (payload["complement"] = float(complement))
     return _build_vennfit(_run(_venn[], payload))
 end
 

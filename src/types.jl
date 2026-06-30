@@ -9,8 +9,8 @@ struct Point
     y::Float64
 end
 
-"""Supertype of the four fittable shapes (`Circle`, `Ellipse`, `Square`,
-`Rectangle`)."""
+"""Supertype of the five fittable shapes (`Circle`, `Ellipse`, `Square`,
+`Rectangle`, `RotatedRectangle`)."""
 abstract type AbstractShape end
 
 """A fitted circle for one input set."""
@@ -45,6 +45,17 @@ struct Rectangle <: AbstractShape
     center::Point
     width::Float64
     height::Float64
+    label_anchor::Point
+end
+
+"""A fitted rotated rectangle for one input set. `rotation` is the angle (in
+radians) of the rectangle about its `center`."""
+struct RotatedRectangle <: AbstractShape
+    set::String
+    center::Point
+    width::Float64
+    height::Float64
+    rotation::Float64
     label_anchor::Point
 end
 
@@ -181,6 +192,9 @@ function _build_shape(s)
     elseif t == "rectangle"
         return Rectangle(String(s.label), center, Float64(s.width),
                          Float64(s.height), anchor)
+    elseif t == "rotated_rectangle"
+        return RotatedRectangle(String(s.label), center, Float64(s.width),
+                                Float64(s.height), Float64(s.rotation), anchor)
     else
         error("eunoia: unknown shape type '$t'")
     end

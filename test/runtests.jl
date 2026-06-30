@@ -54,6 +54,32 @@ using Eunoia
         @test fit.shapes[1] isa Ellipse
     end
 
+    @testset "venn complement" begin
+        plain = venn(3)
+        @test plain.container === nothing
+
+        fit = venn(3; complement=5.0)
+        @test fit isa VennFit
+        @test fit.container isa Container
+        @test fit.container.width > 0
+    end
+
+    @testset "rotated rectangles" begin
+        # A 4-set Venn is the canonical rotated-rectangle layout.
+        vfit = venn(4; shape="rotated_rectangle")
+        @test vfit isa VennFit
+        @test length(vfit.shapes) == 4
+        @test eltype(vfit.shapes) == RotatedRectangle
+        @test vfit.shapes[1].width > 0
+        @test vfit.shapes[1].height > 0
+        @test vfit.shapes[1].rotation isa Float64
+
+        # Rotated rectangles also fit area-proportionally in `euler`.
+        efit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0);
+                     shape="rotated_rectangle", seed=1)
+        @test efit.shapes[1] isa RotatedRectangle
+    end
+
     @testset "membership-list input" begin
         # x→{A}, y→{A,B}, z→{A,B}, w→{B}
         fit = euler(Dict("A" => ["x", "y", "z"], "B" => ["y", "z", "w"]); seed=1)
@@ -124,6 +150,10 @@ using Eunoia
         @test euler(base; seed=1, optimizer="levenberg_marquardt",
                     mds_solver="lbfgs", initial_sampler="latin_hypercube") isa
               EulerFit
+
+        # Optimizers exposed by capi 1.7.
+        @test euler(base; seed=1, optimizer="mads") isa EulerFit
+        @test euler(base; seed=1, optimizer="cmaes") isa EulerFit
 
         # `max_sets` reaches the spec builder: lowering it below the set count
         # makes the native fit fail; the default cap fits.
@@ -331,8 +361,8 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
             @test (MK.colorbuffer(f); true)
         end
 
-        @testset "ellipse / square / rectangle render" begin
-            for shp in ("ellipse", "square", "rectangle")
+        @testset "ellipse / square / rectangle / rotated_rectangle render" begin
+            for shp in ("ellipse", "square", "rectangle", "rotated_rectangle")
                 p = eunoiaplot(euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0);
                                      shape=shp, seed=1)).plot
                 @test npoly(p) >= 3
@@ -343,6 +373,11 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
             p = eunoiaplot(venn(["A", "B", "C"]; shape="ellipse")).plot
             @test npoly(p) >= 1
             @test (MK.colorbuffer(eunoiaplot(venn(3)).figure); true)
+
+            # A rotated-rectangle 4-set Venn with a complement frame renders.
+            vr = eunoiaplot(venn(4; shape="rotated_rectangle", complement=2.0);
+                            complement=Dict(:color => "#eeeeee")).plot
+            @test npoly(vr) >= 5            # ≥4 region fills + container box
         end
 
         @testset "collision-aware placement" begin
