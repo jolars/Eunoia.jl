@@ -73,8 +73,9 @@ function Makie.plot!(p::EunoiaDiagram)
     p.defer_labels[] && return p
 
     show_labels = resolve_label_visibility(p.labels[], p.legend[])
-    specs = show_labels ? label_specs(p.labels[], names) :
-            Dict{String,Any}(n => nothing for n in names)
+    specs = show_labels ?
+        label_specs(p.labels[], names) :
+        Dict{String, Any}(n => nothing for n in names)
 
     # A set label and a region quantity can land on the exact same anchor (the
     # core derives set anchors from region anchors). When both show, stack them:
@@ -102,8 +103,13 @@ function _diagram_axis(gp; axis = (;))
     return ax
 end
 
-function eunoiaplot(fit::AbstractEulerFit; figure = (;), axis = (;),
-                    legend = false, kwargs...)
+function eunoiaplot(
+    fit::AbstractEulerFit;
+    figure = (;),
+    axis = (;),
+    legend = false,
+    kwargs...,
+)
     f = Figure(; figure...)
     ax = _diagram_axis(f[1, 1]; axis = axis)
     p = eunoiaplot!(ax, fit; legend = legend, kwargs...)
@@ -116,8 +122,12 @@ end
 # data)`. Returns a `Makie.AxisPlot`. No `figure`/`legend` here — the figure
 # exists already, and legend placement in a hand-built layout is the caller's to
 # decide (add a `Legend` yourself).
-function eunoiaplot(gp::Union{Makie.GridPosition,Makie.GridSubposition},
-                    fit::AbstractEulerFit; axis = (;), kwargs...)
+function eunoiaplot(
+    gp::Union{Makie.GridPosition, Makie.GridSubposition},
+    fit::AbstractEulerFit;
+    axis = (;),
+    kwargs...,
+)
     ax = _diagram_axis(gp; axis = axis)
     p = eunoiaplot!(ax, fit; kwargs...)
     return Makie.AxisPlot(ax, p)
@@ -132,8 +142,13 @@ forms); the resolved label boxes and any exterior leader polylines are drawn int
 `ax`. Pass `label_placement=false` to instead leave labels at their raw anchors.
 `leader_style` is a collection of `lines!` keywords for the leader lines.
 """
-function eunoiaplot!(ax, fit::AbstractEulerFit; label_placement = true,
-                     leader_style = (;), kwargs...)
+function eunoiaplot!(
+    ax,
+    fit::AbstractEulerFit;
+    label_placement = true,
+    leader_style = (;),
+    kwargs...,
+)
     if label_placement === false
         return eunoiadiagram!(ax, fit; kwargs...)
     end
@@ -150,7 +165,7 @@ function add_legend_if_requested!(f, fit, p, legend)
     base = resolve_colors(p.colors[], names)
     a = p.alpha[]
     elements = [PolyElement(color = (base[n], a)) for n in names]
-    legkw = legend isa Union{AbstractDict,NamedTuple} ? _kw(legend) : (;)
+    legkw = legend isa Union{AbstractDict, NamedTuple} ? _kw(legend) : (;)
     Legend(f[1, 2], elements, names; legkw...)
     return
 end
@@ -161,9 +176,15 @@ end
 # ---------------------------------------------------------------------------
 
 const _TAB10 = RGBf[
-    parse(RGBf, "#1f77b4"), parse(RGBf, "#ff7f0e"), parse(RGBf, "#2ca02c"),
-    parse(RGBf, "#d62728"), parse(RGBf, "#9467bd"), parse(RGBf, "#8c564b"),
-    parse(RGBf, "#e377c2"), parse(RGBf, "#7f7f7f"), parse(RGBf, "#bcbd22"),
+    parse(RGBf, "#1f77b4"),
+    parse(RGBf, "#ff7f0e"),
+    parse(RGBf, "#2ca02c"),
+    parse(RGBf, "#d62728"),
+    parse(RGBf, "#9467bd"),
+    parse(RGBf, "#8c564b"),
+    parse(RGBf, "#e377c2"),
+    parse(RGBf, "#7f7f7f"),
+    parse(RGBf, "#bcbd22"),
     parse(RGBf, "#17becf"),
 ]
 
@@ -173,38 +194,49 @@ function resolve_colors(colors, names)
     if colors === Makie.automatic
         return Dict(n => _TAB10[mod1(i, 10)] for (i, n) in enumerate(names))
     elseif colors isa AbstractDict
-        return Dict(n => (haskey(colors, n) ? _as_rgb(colors[n]) : _TAB10[mod1(i, 10)])
-                    for (i, n) in enumerate(names))
+        return Dict(
+            n => (haskey(colors, n) ? _as_rgb(colors[n]) : _TAB10[mod1(i, 10)])
+            for (i, n) in enumerate(names)
+        )
     else
-        length(colors) < length(names) && error(
-            "eunoia: colors has $(length(colors)) entries but there are $(length(names)) sets")
+        length(colors) < length(names) &&
+            error(
+                "eunoia: colors has $(length(colors)) entries but there are $(length(names)) sets",
+            )
         return Dict(n => _as_rgb(colors[i]) for (i, n) in enumerate(names))
     end
 end
 
 _srgb_to_linear(c) = c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055)^2.4
-_linear_to_srgb(c) =
-    clamp(c <= 0.0031308 ? 12.92c : 1.055 * c^(1 / 2.4) - 0.055, 0.0, 1.0)
+_linear_to_srgb(c) = clamp(c <= 0.0031308 ? 12.92c : 1.055 * c^(1 / 2.4) - 0.055, 0.0, 1.0)
 
 function _srgb_to_oklab(r, g, b)
-    lr = _srgb_to_linear(r); lg = _srgb_to_linear(g); lb = _srgb_to_linear(b)
+    lr = _srgb_to_linear(r)
+    lg = _srgb_to_linear(g)
+    lb = _srgb_to_linear(b)
     lc = 0.4122214708lr + 0.5363325363lg + 0.0514459929lb
     mc = 0.2119034982lr + 0.6806995451lg + 0.1073969566lb
     sc = 0.0883024619lr + 0.2817188376lg + 0.6299787005lb
-    l_ = cbrt(lc); m_ = cbrt(mc); s_ = cbrt(sc)
-    return (0.2104542553l_ + 0.7936177850m_ - 0.0040720468s_,
-            1.9779984951l_ - 2.4285922050m_ + 0.4505937099s_,
-            0.0259040371l_ + 0.7827717662m_ - 0.8086757660s_)
+    l_ = cbrt(lc)
+    m_ = cbrt(mc)
+    s_ = cbrt(sc)
+    return (
+        0.2104542553l_ + 0.793617785m_ - 0.0040720468s_,
+        1.9779984951l_ - 2.428592205m_ + 0.4505937099s_,
+        0.0259040371l_ + 0.7827717662m_ - 0.808675766s_,
+    )
 end
 
 function _oklab_to_srgb(big_l, a, b)
     l_ = big_l + 0.3963377774a + 0.2158037573b
     m_ = big_l - 0.1055613458a - 0.0638541728b
-    s_ = big_l - 0.0894841775a - 1.2914855480b
-    lc = l_^3; mc = m_^3; sc = s_^3
+    s_ = big_l - 0.0894841775a - 1.291485548b
+    lc = l_^3
+    mc = m_^3
+    sc = s_^3
     lr = 4.0767416621lc - 3.3077115913mc + 0.2309699292sc
     lg = -1.2684380046lc + 2.6097574011mc - 0.3413193965sc
-    lb = -0.0041960863lc - 0.7034186147mc + 1.7076147010sc
+    lb = -0.0041960863lc - 0.7034186147mc + 1.707614701sc
     return (_linear_to_srgb(lr), _linear_to_srgb(lg), _linear_to_srgb(lb))
 end
 
@@ -244,10 +276,20 @@ _kw(::Nothing) = (;)
 function draw_complement!(p, fit, complement)
     fit.container === nothing && return
     c = fit.container
-    rect = Makie.Rect2f(c.center.x - c.width / 2, c.center.y - c.height / 2,
-                        c.width, c.height)
-    attrs = merge((color = RGBf(0.94, 0.94, 0.94), strokecolor = RGBf(0.4, 0.4, 0.4),
-                   strokewidth = 1.0), _kw(complement === Makie.automatic ? (;) : complement))
+    rect = Makie.Rect2f(
+        c.center.x - c.width / 2,
+        c.center.y - c.height / 2,
+        c.width,
+        c.height,
+    )
+    attrs = merge(
+        (
+            color = RGBf(0.94, 0.94, 0.94),
+            strokecolor = RGBf(0.4, 0.4, 0.4),
+            strokewidth = 1.0,
+        ),
+        _kw(complement === Makie.automatic ? (;) : complement),
+    )
     poly!(p, rect; attrs...)
     return
 end
@@ -256,12 +298,16 @@ function draw_region_fills!(p, pd, base, fills, default_alpha)
     haskey(pd, :region_pieces) || return
     for (key, pieces) in pairs(pd.region_pieces)
         combo = String(key)
-        isempty(combo) && continue            # complement region — box covers it
+        isempty(combo) && continue # complement region — box covers it
         members = String.(split(combo, '&'))
         cols = RGBf[base[m] for m in members if haskey(base, m)]
-        override = (fills isa AbstractDict && haskey(fills, combo)) ? _kw(fills[combo]) : (;)
-        attrs = merge((color = blend_region_color(cols), alpha = default_alpha,
-                       strokewidth = 0), override)
+        override = (fills isa AbstractDict && haskey(fills, combo)) ?
+            _kw(fills[combo]) :
+            (;)
+        attrs = merge(
+            (color = blend_region_color(cols), alpha = default_alpha, strokewidth = 0),
+            override,
+        )
         for piece in pieces
             poly!(p, piece_to_polygon(piece); attrs...)
         end
@@ -281,7 +327,7 @@ function draw_outlines!(p, pd, names, base, edges)
         haskey(pd.shape_outlines, Symbol(n)) || continue
         pts = _ring(pd.shape_outlines[Symbol(n)])
         length(pts) < 3 && continue
-        push!(pts, pts[1])                    # close the open polyline
+        push!(pts, pts[1]) # close the open polyline
         default_color = match ? base[n] : :black
         attrs = merge((color = default_color, linewidth = 1.5), edge_style(n, edges, i))
         lines!(p, pts; attrs...)
@@ -292,13 +338,13 @@ end
 function edge_style(name, edges, i)
     (edges === Makie.automatic || _edges_match(edges)) && return (;)
     if edges isa AbstractDict
-        if !isempty(edges) && all(v -> v isa Union{AbstractDict,NamedTuple}, values(edges))
+        if !isempty(edges) && all(v -> v isa Union{AbstractDict, NamedTuple}, values(edges))
             return haskey(edges, name) ? _kw(edges[name]) : (;)   # per-set
         end
         return _kw(edges)                     # uniform
     elseif edges isa AbstractVector
-        length(edges) < i && error(
-            "eunoia: edges sequence is shorter than the number of sets")
+        length(edges) < i &&
+            error("eunoia: edges sequence is shorter than the number of sets")
         return _kw(edges[i])
     end
     return (;)
@@ -319,13 +365,14 @@ end
 
 # Per-set label resolution → Dict(name => (text, style)) or `nothing` to hide.
 function label_specs(labels, names)
-    base = Dict{String,Any}(n => (n, (;)) for n in names)
+    base = Dict{String, Any}(n => (n, (;)) for n in names)
     labels isa AbstractDict || return base    # automatic/true/nothing → defaults
     nameset = Set(names)
     known = [String(k) for k in keys(labels) if String(k) in nameset]
-    if isempty(known)                         # uniform style applied to all
+    if isempty(known)
+        # uniform style applied to all
         style = _kw(labels)
-        return Dict{String,Any}(n => (n, style) for n in names)
+        return Dict{String, Any}(n => (n, style) for n in names)
     end
     for (k, v) in labels
         ks = String(k)
@@ -334,19 +381,21 @@ function label_specs(labels, names)
             base[ks] = nothing
         elseif v isa AbstractString
             base[ks] = (String(v), (;))
-        elseif v isa Union{AbstractDict,NamedTuple}
+        elseif v isa Union{AbstractDict, NamedTuple}
             d = _kw(v)
             txt = haskey(d, :text) ? String(d.text) : ks
             base[ks] = (txt, Base.structdiff(d, NamedTuple{(:text,)}))
         else
-            error("eunoia: labels[$ks] must be a String, Dict, NamedTuple, nothing, or false")
+            error(
+                "eunoia: labels[$ks] must be a String, Dict, NamedTuple, nothing, or false",
+            )
         end
     end
     return base
 end
 
 function collect_label_points(pd, names, specs, show_labels)
-    pts = Set{Tuple{Float64,Float64}}()
+    pts = Set{Tuple{Float64, Float64}}()
     (show_labels && haskey(pd, :set_anchors)) || return pts
     for n in names
         specs[n] === nothing && continue
@@ -375,7 +424,9 @@ end
 # ---- quantities ------------------------------------------------------------
 
 function resolve_quantities(q)
-    source = "original"; types = ["counts"]; style = (;)
+    source = "original"
+    types = ["counts"]
+    style = (;)
     if q === true
         # defaults
     elseif q isa AbstractString
@@ -384,15 +435,19 @@ function resolve_quantities(q)
         elseif q in ("counts", "percent")
             types = [q]
         else
-            error("eunoia: quantities string must be original/fitted/counts/percent; got $q")
+            error(
+                "eunoia: quantities string must be original/fitted/counts/percent; got $q",
+            )
         end
-    elseif q isa Union{AbstractDict,NamedTuple}
+    elseif q isa Union{AbstractDict, NamedTuple}
         d = _kw(q)
         source = haskey(d, :source) ? String(d.source) : "original"
         source in ("original", "fitted") ||
             error("eunoia: quantities source must be original or fitted; got $source")
         rawtype = haskey(d, :type) ? d.type : "counts"
-        types = rawtype isa AbstractString ? [String(rawtype)] : [String(t) for t in rawtype]
+        types = rawtype isa AbstractString ?
+            [String(rawtype)] :
+            [String(t) for t in rawtype]
         all(t -> t in ("counts", "percent"), types) ||
             error("eunoia: quantities type entries must be counts or percent")
         style = Base.structdiff(d, NamedTuple{(:source, :type)})
@@ -401,7 +456,7 @@ function resolve_quantities(q)
 end
 
 function collect_quantity_points(pd, fit, qinfo)
-    pts = Set{Tuple{Float64,Float64}}()
+    pts = Set{Tuple{Float64, Float64}}()
     (qinfo !== nothing && haskey(pd, :region_anchors)) || return pts
     source, _, _ = qinfo
     vals = source == "fitted" ? fit.fitted_values : fit.original_values
@@ -450,10 +505,12 @@ const MAX_BBOX_FACTOR = 25.0
 # native field exists).
 function set_host_regions(pd)
     if haskey(pd, :set_anchor_regions)
-        return Dict{String,String}(String(s) => String(r)
-                                   for (s, r) in pairs(pd.set_anchor_regions))
+        return Dict{String, String}(
+            String(s) => String(r)
+            for (s, r) in pairs(pd.set_anchor_regions)
+        )
     end
-    hosts = Dict{String,String}()
+    hosts = Dict{String, String}()
     (haskey(pd, :set_anchors) && haskey(pd, :region_anchors)) || return hosts
     for (s, sa) in pairs(pd.set_anchors)
         sx, sy = Float64(sa[1]), Float64(sa[2])
@@ -471,13 +528,14 @@ end
 # names first (mirroring the web's `nestedSets`/`regionTitleLines`), then the
 # quantity. Regions with no content are absent from the result.
 function region_label_lines(pd, fit, names, specs, show_labels, qinfo, fontsize)
-    out = Dict{String,Vector{Tuple{String,Float64,Any}}}()
+    out = Dict{String, Vector{Tuple{String, Float64, Any}}}()
     region_keys = haskey(pd, :region_anchors) ?
-                  Set(String(k) for k in keys(pd.region_anchors)) : Set{String}()
+        Set(String(k) for k in keys(pd.region_anchors)) :
+        Set{String}()
 
     if show_labels
         hosts = set_host_regions(pd)
-        nested = Dict{String,Vector{String}}()
+        nested = Dict{String, Vector{String}}()
         for s in names
             h = get(hosts, s, nothing)
             (h === nothing || !occursin('&', h)) && continue
@@ -490,7 +548,11 @@ function region_label_lines(pd, fit, names, specs, show_labels, qinfo, fontsize)
                 sp = get(specs, s, nothing)
                 sp === nothing && continue
                 txt, style = sp
-                push!(get!(out, combo, Tuple{String,Float64,Any}[]), (txt, fontsize, style))
+                push!(get!(out, combo, Tuple{String, Float64, Any}[]), (
+                    txt,
+                    fontsize,
+                    style,
+                ))
             end
         end
     end
@@ -503,8 +565,11 @@ function region_label_lines(pd, fit, names, specs, show_labels, qinfo, fontsize)
         for combo in region_keys
             (isempty(combo) || !haskey(vals, combo)) && continue
             txt = format_quantity(vals[combo], total, types)
-            push!(get!(out, combo, Tuple{String,Float64,Any}[]),
-                  (txt, fontsize * QUANTITY_FONT_FACTOR, cstyle))
+            push!(get!(out, combo, Tuple{String, Float64, Any}[]), (
+                txt,
+                fontsize * QUANTITY_FONT_FACTOR,
+                cstyle,
+            ))
         end
     end
     return out
@@ -520,7 +585,9 @@ function _label_font(ax)
     end
 end
 
-_line_dims(text, fs, font) = Tuple(Makie.widths(Makie.text_bb(text, font, Float32(fs)))[1:2])
+_line_dims(text, fs, font) = Tuple(Makie.widths(Makie.text_bb(text, font, Float32(
+    fs,
+)))[1:2])
 
 # Stacked-box dimensions in pixels: widest line × summed heights + inter-line gaps.
 function measure_box(lines, font, gap)
@@ -550,15 +617,19 @@ function geom_bbox(fit)
     if haskey(pd, :region_pieces)
         for (_, pieces) in pairs(pd.region_pieces), piece in pieces
             for pt in piece.outer
-                xmin = min(xmin, pt[1]); xmax = max(xmax, pt[1])
-                ymin = min(ymin, pt[2]); ymax = max(ymax, pt[2])
+                xmin = min(xmin, pt[1])
+                xmax = max(xmax, pt[1])
+                ymin = min(ymin, pt[2])
+                ymax = max(ymax, pt[2])
             end
         end
     end
     if fit.container !== nothing
         c = fit.container
-        xmin = min(xmin, c.center.x - c.width / 2); xmax = max(xmax, c.center.x + c.width / 2)
-        ymin = min(ymin, c.center.y - c.height / 2); ymax = max(ymax, c.center.y + c.height / 2)
+        xmin = min(xmin, c.center.x - c.width / 2)
+        xmax = max(xmax, c.center.x + c.width / 2)
+        ymin = min(ymin, c.center.y - c.height / 2)
+        ymax = max(ymax, c.center.y + c.height / 2)
     end
     return (xmin, xmax, ymin, ymax)
 end
@@ -566,8 +637,12 @@ end
 # Extend `geom` to cover every placed label box and leader vertex.
 function placement_bbox(geom, placements, sizes_data)
     xmin, xmax, ymin, ymax = geom
-    consume(x, y) = (xmin = min(xmin, x); xmax = max(xmax, x);
-                     ymin = min(ymin, y); ymax = max(ymax, y))
+    consume(x, y) = (
+        xmin = min(xmin, x);
+        xmax = max(xmax, x);
+        ymin = min(ymin, y);
+        ymax = max(ymax, y)
+    )
     for (combo, pl) in placements
         haskey(sizes_data, combo) || continue
         w, h = sizes_data[combo]
@@ -588,18 +663,29 @@ function place_and_draw_labels!(ax, p, fit, label_placement, leader_style)
     base = resolve_colors(p.colors[], names)
     fontsize = Float64(p.fontsize[])
     show_labels = resolve_label_visibility(p.labels[], p.legend[])
-    specs = show_labels ? label_specs(p.labels[], names) :
-            Dict{String,Any}(n => nothing for n in names)
+    specs = show_labels ?
+        label_specs(p.labels[], names) :
+        Dict{String, Any}(n => nothing for n in names)
     qinfo = p.quantities[] === false ? nothing : resolve_quantities(p.quantities[])
 
-    lines_by_region = region_label_lines(pd, fit, names, specs, show_labels, qinfo, fontsize)
+    lines_by_region = region_label_lines(
+        pd,
+        fit,
+        names,
+        specs,
+        show_labels,
+        qinfo,
+        fontsize,
+    )
     isempty(lines_by_region) && return
 
     font = _label_font(ax)
     gap = 0.15 * fontsize
-    boxes_px = Dict(combo => measure_box(lines, font, gap)
-                    for (combo, lines) in lines_by_region)
-    strat = label_placement isa Union{NamedTuple,AbstractDict} ? _kw(label_placement) : (;)
+    boxes_px = Dict(
+        combo => measure_box(lines, font, gap)
+        for (combo, lines) in lines_by_region
+    )
+    strat = label_placement isa Union{NamedTuple, AbstractDict} ? _kw(label_placement) : (;)
     geom = geom_bbox(fit)
 
     geom_extent = max(geom[2] - geom[1], geom[4] - geom[3])
@@ -609,8 +695,8 @@ function place_and_draw_labels!(ax, p, fit, label_placement, leader_style)
     # repeat until the view extent settles. The kept `placements`/`sizes_data`
     # always match the currently pinned limits, so the render is self-consistent.
     Makie.reset_limits!(ax)
-    placements = Dict{String,Eunoia.LabelPlacement}()
-    sizes_data = Dict{String,Tuple{Float64,Float64}}()
+    placements = Dict{String, Eunoia.LabelPlacement}()
+    sizes_data = Dict{String, Tuple{Float64, Float64}}()
     prev_extent = nothing
     for _ in 1:MAX_PLACE_ITERS
         sx, sy = axis_scale(ax)
@@ -623,7 +709,8 @@ function place_and_draw_labels!(ax, p, fit, label_placement, leader_style)
         !isempty(placements) && extent > max_extent && break
         placements, sizes_data = cand, cand_sizes
         prev_extent !== nothing &&
-            abs(extent - prev_extent) <= PLACE_EXTENT_TOL * prev_extent && break
+            abs(extent - prev_extent) <= PLACE_EXTENT_TOL * prev_extent &&
+            break
         prev_extent = extent
         pad = 0.03 * extent
         Makie.limits!(ax, xmin - pad, xmax + pad, ymin - pad, ymax + pad)
@@ -658,8 +745,15 @@ function draw_placed_labels!(p, lines_by_region, placements, font, gap, leader_s
             lh = _line_dims(text, fs, font)[2]
             cy = cursor - lh / 2
             cursor -= lh + gap
-            attrs = merge((align = (:center, :center), fontsize = fs,
-                           offset = (0.0f0, Float32(cy)), markerspace = :pixel), _kw(style))
+            attrs = merge(
+                (
+                    align = (:center, :center),
+                    fontsize = fs,
+                    offset = (0.0f0, Float32(cy)),
+                    markerspace = :pixel,
+                ),
+                _kw(style),
+            )
             text!(p, anchor; text = text, attrs...)
         end
     end
@@ -675,10 +769,20 @@ function draw_quantities!(p, pd, fit, qinfo, label_points, fontsize)
         combo = String(key)
         (isempty(combo) || !haskey(vals, combo)) && continue
         valign = (Float64(anchor[1]), Float64(anchor[2])) in label_points ? :top : :center
-        attrs = merge((align = (:center, valign), fontsize = fontsize * QUANTITY_FONT_FACTOR,
-                       color = RGBf(0.41, 0.41, 0.41)), _kw(style))
-        text!(p, Point2f(anchor[1], anchor[2]); text = format_quantity(vals[combo], total, types),
-              attrs...)
+        attrs = merge(
+            (
+                align = (:center, valign),
+                fontsize = fontsize * QUANTITY_FONT_FACTOR,
+                color = RGBf(0.41, 0.41, 0.41),
+            ),
+            _kw(style),
+        )
+        text!(
+            p,
+            Point2f(anchor[1], anchor[2]);
+            text = format_quantity(vals[combo], total, types),
+            attrs...,
+        )
     end
     return
 end

@@ -53,7 +53,7 @@ function _find_lib(dir::AbstractString)
     for (root, _, files) in walkdir(dir)
         for f in files
             if (startswith(f, "libeunoia_capi") || startswith(f, "eunoia_capi")) &&
-               endswith(f, ext)
+                    endswith(f, ext)
                 return joinpath(root, f)
             end
         end
@@ -77,13 +77,15 @@ function _locate_library()
         end
     end
 
-    error("""
+    error(
+        """
           Could not locate the eunoia native library.
 
           Either set ENV["EUNOIA_CAPI_LIB"] to a locally built
           libeunoia_capi (run `cargo build -p eunoia-capi --release`), or
           populate Artifacts.toml via gen/generate_artifacts.jl.
-          """)
+          """,
+    )
 end
 
 function __init__()
@@ -197,38 +199,43 @@ Returns an [`EulerFit`](@ref) carrying the fitted `shapes`, the
 `region_error`, the scalar fit metrics, and—if a `complement` was given—a
 `container`.
 """
-function euler(values::AbstractDict; shape::AbstractString="circle",
-               input_type::AbstractString="exclusive",
-               complement::Union{Nothing,Real}=nothing,
-               seed::Union{Nothing,Integer}=nothing,
-               max_sets::Union{Nothing,Integer}=nothing,
-               loss::Union{Nothing,AbstractString}=nothing,
-               loss_eps::Union{Nothing,Real}=nothing,
-               n_restarts::Union{Nothing,Integer}=nothing,
-               optimizer::Union{Nothing,AbstractString}=nothing,
-               mds_solver::Union{Nothing,AbstractString}=nothing,
-               initial_sampler::Union{Nothing,AbstractString}=nothing,
-               cmaes_fallback_threshold::Union{Nothing,Real}=nothing,
-               max_iterations::Union{Nothing,Integer}=nothing,
-               tolerance::Union{Nothing,Real}=nothing,
-               xtol::Union{Nothing,Real}=nothing,
-               ftol::Union{Nothing,Real}=nothing,
-               gtol::Union{Nothing,Real}=nothing,
-               jobs::Union{Nothing,Integer}=nothing,
-               n_vertices::Union{Nothing,Integer}=nothing,
-               label_precision::Union{Nothing,Real}=nothing,
-               sliver_threshold::Union{Nothing,Real}=nothing)
+function euler(
+    values::AbstractDict;
+    shape::AbstractString = "circle",
+    input_type::AbstractString = "exclusive",
+    complement::Union{Nothing, Real} = nothing,
+    seed::Union{Nothing, Integer} = nothing,
+    max_sets::Union{Nothing, Integer} = nothing,
+    loss::Union{Nothing, AbstractString} = nothing,
+    loss_eps::Union{Nothing, Real} = nothing,
+    n_restarts::Union{Nothing, Integer} = nothing,
+    optimizer::Union{Nothing, AbstractString} = nothing,
+    mds_solver::Union{Nothing, AbstractString} = nothing,
+    initial_sampler::Union{Nothing, AbstractString} = nothing,
+    cmaes_fallback_threshold::Union{Nothing, Real} = nothing,
+    max_iterations::Union{Nothing, Integer} = nothing,
+    tolerance::Union{Nothing, Real} = nothing,
+    xtol::Union{Nothing, Real} = nothing,
+    ftol::Union{Nothing, Real} = nothing,
+    gtol::Union{Nothing, Real} = nothing,
+    jobs::Union{Nothing, Integer} = nothing,
+    n_vertices::Union{Nothing, Integer} = nothing,
+    label_precision::Union{Nothing, Real} = nothing,
+    sliver_threshold::Union{Nothing, Real} = nothing,
+)
     if is_membership_input(values)
-        input_type == "exclusive" || error(
-            "invalid_input: membership-list input is always exclusive; " *
-            "do not pass input_type=\"inclusive\"")
+        input_type == "exclusive" ||
+            error(
+                "invalid_input: membership-list input is always exclusive; " *
+                    "do not pass input_type=\"inclusive\"",
+            )
         original_values = parse_membership_input(values)
         canonical_keys = collect(keys(original_values))
         combos = [(c, s) for (c, s) in original_values]
     else
-        original_values = Dict{String,Float64}()
+        original_values = Dict{String, Float64}()
         canonical_keys = String[]
-        combos = Tuple{String,Float64}[]
+        combos = Tuple{String, Float64}[]
         for (k, v) in values
             ck = canonicalize(string(k))
             original_values[ck] = float(v)
@@ -237,7 +244,7 @@ function euler(values::AbstractDict; shape::AbstractString="circle",
         end
     end
 
-    payload = Dict{String,Any}(
+    payload = Dict{String, Any}(
         "sets" => [Dict("combination" => c, "size" => s) for (c, s) in combos],
         "shape" => shape,
         "input_type" => input_type,
@@ -302,10 +309,13 @@ Returns a [`VennFit`](@ref): the same structure as [`EulerFit`](@ref), but the
 layout is topological, so `fitted_values` holds each region's geometric area and
 `original_values` is empty.
 """
-function venn(sets; shape::AbstractString="circle",
-              complement::Union{Nothing,Real}=nothing)
+function venn(
+    sets;
+    shape::AbstractString = "circle",
+    complement::Union{Nothing, Real} = nothing,
+)
     names = _resolve_names(sets)
-    payload = Dict{String,Any}("names" => names, "shape" => shape)
+    payload = Dict{String, Any}("names" => names, "shape" => shape)
     complement === nothing || (payload["complement"] = float(complement))
     return _build_vennfit(_run(_venn[], payload))
 end
@@ -355,37 +365,43 @@ placements = place_labels(fit, Dict("A" => (0.6, 0.3), "B" => (0.6, 0.3));
                           placement="force_directed")
 ```
 """
-function place_labels(fit::AbstractEulerFit, sizes::AbstractDict;
-                      placement::Union{Nothing,AbstractString}=nothing,
-                      leader::Union{Nothing,AbstractString}=nothing,
-                      margin::Union{Nothing,Real}=nothing,
-                      iterations::Union{Nothing,Integer}=nothing,
-                      precision::Union{Nothing,Real}=nothing,
-                      tether::Union{Nothing,AbstractString}=nothing,
-                      leader_gap::Union{Nothing,Real}=nothing,
-                      min_gap::Union{Nothing,Real}=nothing)
-    payload = Dict{String,Any}(
-        "regions" => fit.plot_data.region_pieces,
-        "sizes" => Dict{String,Any}(
-            string(k) => Float64[float(v[1]), float(v[2])] for (k, v) in sizes),
-    )
+function place_labels(
+    fit::AbstractEulerFit,
+    sizes::AbstractDict;
+    placement::Union{Nothing, AbstractString} = nothing,
+    leader::Union{Nothing, AbstractString} = nothing,
+    margin::Union{Nothing, Real} = nothing,
+    iterations::Union{Nothing, Integer} = nothing,
+    precision::Union{Nothing, Real} = nothing,
+    tether::Union{Nothing, AbstractString} = nothing,
+    leader_gap::Union{Nothing, Real} = nothing,
+    min_gap::Union{Nothing, Real} = nothing,
+)
+    payload = Dict{String, Any}("regions" => fit.plot_data.region_pieces, "sizes" => Dict{
+        String,
+        Any,
+    }(string(k) => Float64[float(v[1]), float(v[2])] for (k, v) in sizes))
     if fit.container !== nothing
         c = fit.container
-        payload["container"] = Dict("x" => c.center.x, "y" => c.center.y,
-                                    "width" => c.width, "height" => c.height)
+        payload["container"] = Dict(
+            "x" => c.center.x,
+            "y" => c.center.y,
+            "width" => c.width,
+            "height" => c.height,
+        )
     end
 
     # Strategy knobs, forwarded only when set so omitted ones keep the native
     # defaults (the slice (a)/(b) `=== nothing ||` idiom). JSON field names match
     # the kwarg names one-to-one (snake_case enum tokens validated capi-side).
-    lead = Dict{String,Any}()
+    lead = Dict{String, Any}()
     leader === nothing || (lead["type"] = leader)
     placement === nothing || (lead["placement"] = placement)
     margin === nothing || (lead["margin"] = float(margin))
     iterations === nothing || (lead["iterations"] = Int(iterations))
     min_gap === nothing || (lead["min_gap"] = float(min_gap))
 
-    strategy = Dict{String,Any}()
+    strategy = Dict{String, Any}()
     isempty(lead) || (strategy["leader"] = lead)
     precision === nothing || (strategy["precision"] = float(precision))
     tether === nothing || (strategy["tether"] = tether)
@@ -483,10 +499,12 @@ function eunoiaplot! end
 # Friendly error until a Makie backend triggers the extension; shadowed by the
 # extension's more-specific methods once Makie is loaded.
 eunoiaplot(::AbstractEulerFit, args...; kwargs...) = error(
-    "eunoiaplot requires a Makie backend; run `using CairoMakie` (or GLMakie) first.")
+    "eunoiaplot requires a Makie backend; run `using CairoMakie` (or GLMakie) first.",
+)
 # No no-backend fallback for the grid-position form: a `GridPosition` can only be
 # constructed from a `Figure`, which already requires a Makie backend.
 eunoiaplot!(::Any, ::AbstractEulerFit, args...; kwargs...) = error(
-    "eunoiaplot! requires a Makie backend; run `using CairoMakie` (or GLMakie) first.")
+    "eunoiaplot! requires a Makie backend; run `using CairoMakie` (or GLMakie) first.",
+)
 
 end # module
