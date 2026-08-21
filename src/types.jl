@@ -83,14 +83,14 @@ empty for interior placements.
 struct LabelPlacement
     anchor::Point
     kind::Symbol
-    tether::Union{Point,Nothing}
-    leader_end::Union{Point,Nothing}
+    tether::Union{Point, Nothing}
+    leader_end::Union{Point, Nothing}
     leader_waypoints::Vector{Point}
 end
 
 """Supertype of [`EulerFit`](@ref) and [`VennFit`](@ref), parametrized by the
 shape type `S`."""
-abstract type AbstractEulerFit{S<:AbstractShape} end
+abstract type AbstractEulerFit{S <: AbstractShape} end
 
 """
     EulerFit{S}
@@ -117,15 +117,15 @@ label anchors); it backs plotting and is not part of the stable public API.
 """
 struct EulerFit{S} <: AbstractEulerFit{S}
     shapes::Vector{S}
-    original_values::Dict{String,Float64}
-    fitted_values::Dict{String,Float64}
-    residuals::Dict{String,Float64}
-    region_error::Dict{String,Float64}
+    original_values::Dict{String, Float64}
+    fitted_values::Dict{String, Float64}
+    residuals::Dict{String, Float64}
+    region_error::Dict{String, Float64}
     diag_error::Float64
     stress::Float64
     loss::Float64
     iterations::Int
-    container::Union{Container,Nothing}
+    container::Union{Container, Nothing}
     plot_data::JSON3.Object
 end
 
@@ -140,15 +140,15 @@ holds the geometric area of each region.
 """
 struct VennFit{S} <: AbstractEulerFit{S}
     shapes::Vector{S}
-    original_values::Dict{String,Float64}
-    fitted_values::Dict{String,Float64}
-    residuals::Dict{String,Float64}
-    region_error::Dict{String,Float64}
+    original_values::Dict{String, Float64}
+    fitted_values::Dict{String, Float64}
+    residuals::Dict{String, Float64}
+    region_error::Dict{String, Float64}
     diag_error::Float64
     stress::Float64
     loss::Float64
     iterations::Int
-    container::Union{Container,Nothing}
+    container::Union{Container, Nothing}
     plot_data::JSON3.Object
 end
 
@@ -162,14 +162,20 @@ _point(o) = Point(Float64(o.x), Float64(o.y))
 `Dict{String,LabelPlacement}`. Optional leader fields are absent (not null) for
 interior placements."""
 function _build_placements(resp)
-    out = Dict{String,LabelPlacement}()
+    out = Dict{String, LabelPlacement}()
     for (k, p) in pairs(resp.placements)
         tether = haskey(p, :tether) ? _xy(p.tether) : nothing
         leader_end = haskey(p, :leader_end) ? _xy(p.leader_end) : nothing
         waypoints = haskey(p, :leader_waypoints) ?
-                    [_xy(w) for w in p.leader_waypoints] : Point[]
-        out[String(k)] = LabelPlacement(_xy(p.anchor), Symbol(String(p.kind)),
-                                        tether, leader_end, waypoints)
+            [_xy(w) for w in p.leader_waypoints] :
+            Point[]
+        out[String(k)] = LabelPlacement(
+            _xy(p.anchor),
+            Symbol(String(p.kind)),
+            tether,
+            leader_end,
+            waypoints,
+        )
     end
     return out
 end
@@ -185,16 +191,33 @@ function _build_shape(s)
     if t == "circle"
         return Circle(String(s.label), center, Float64(s.radius), anchor)
     elseif t == "ellipse"
-        return Ellipse(String(s.label), center, Float64(s.semi_major),
-                       Float64(s.semi_minor), Float64(s.rotation), anchor)
+        return Ellipse(
+            String(s.label),
+            center,
+            Float64(s.semi_major),
+            Float64(s.semi_minor),
+            Float64(s.rotation),
+            anchor,
+        )
     elseif t == "square"
         return Square(String(s.label), center, Float64(s.side), anchor)
     elseif t == "rectangle"
-        return Rectangle(String(s.label), center, Float64(s.width),
-                         Float64(s.height), anchor)
+        return Rectangle(
+            String(s.label),
+            center,
+            Float64(s.width),
+            Float64(s.height),
+            anchor,
+        )
     elseif t == "rotated_rectangle"
-        return RotatedRectangle(String(s.label), center, Float64(s.width),
-                                Float64(s.height), Float64(s.rotation), anchor)
+        return RotatedRectangle(
+            String(s.label),
+            center,
+            Float64(s.width),
+            Float64(s.height),
+            Float64(s.rotation),
+            anchor,
+        )
     else
         error("eunoia: unknown shape type '$t'")
     end
@@ -202,15 +225,13 @@ end
 
 """Convert a JSON area map (symbol keys) to a `Dict{String,Float64}`. Keys are
 combination strings like `"A&B"`, recovered via `String`."""
-_area_dict(obj) =
-    Dict{String,Float64}(String(k) => Float64(v) for (k, v) in pairs(obj))
+_area_dict(obj) = Dict{String, Float64}(String(k) => Float64(v) for (k, v) in pairs(obj))
 
 """Read the optional container box; absent (not null) when no complement."""
 function _build_container(resp)
     haskey(resp, :container) || return nothing
     c = resp.container
-    return Container(Point(Float64(c.x), Float64(c.y)),
-                     Float64(c.width), Float64(c.height))
+    return Container(Point(Float64(c.x), Float64(c.y)), Float64(c.width), Float64(c.height))
 end
 
 """Build the fitted shapes, narrowed to a concrete `Vector{S}` (falling back to
@@ -228,24 +249,37 @@ end
 fitted areas from the native library are always exclusive, so for inclusive
 input they are reconstructed via [`to_inclusive`](@ref) before computing
 residuals — mirroring `eunoia-py`'s `_finish`."""
-function _finish_euler(resp, original_values::Dict{String,Float64},
-                       canonical_keys::Vector{String}, input_type::AbstractString)
+function _finish_euler(
+    resp,
+    original_values::Dict{String, Float64},
+    canonical_keys::Vector{String},
+    input_type::AbstractString,
+)
     S, shapes = _build_shapes(resp)
     fitted_exclusive = _area_dict(resp.metrics.fitted_areas)
     fitted_values = if input_type == "inclusive"
         to_inclusive(fitted_exclusive, canonical_keys)
     else
-        Dict{String,Float64}(
-            ck => get(fitted_exclusive, ck, 0.0) for ck in canonical_keys)
+        Dict{String, Float64}(ck => get(fitted_exclusive, ck, 0.0) for ck in canonical_keys)
     end
-    residuals = Dict{String,Float64}(
+    residuals = Dict{String, Float64}(
         ck => original_values[ck] - get(fitted_values, ck, 0.0)
-        for ck in canonical_keys)
+        for ck in canonical_keys
+    )
     m = resp.metrics
-    return EulerFit{S}(shapes, original_values, fitted_values, residuals,
-                       _area_dict(m.region_error),
-                       Float64(m.diag_error), Float64(m.stress), Float64(m.loss),
-                       Int(m.iterations), _build_container(resp), resp.plot_data)
+    return EulerFit{S}(
+        shapes,
+        original_values,
+        fitted_values,
+        residuals,
+        _area_dict(m.region_error),
+        Float64(m.diag_error),
+        Float64(m.stress),
+        Float64(m.loss),
+        Int(m.iterations),
+        _build_container(resp),
+        resp.plot_data,
+    )
 end
 
 """Assemble a [`VennFit`](@ref). The layout is topological, so `fitted_values`
@@ -254,10 +288,20 @@ function _build_vennfit(resp)
     S, shapes = _build_shapes(resp)
     fitted = _area_dict(resp.metrics.fitted_areas)
     m = resp.metrics
-    empty = Dict{String,Float64}()
-    return VennFit{S}(shapes, empty, fitted, empty, empty,
-                      Float64(m.diag_error), Float64(m.stress), Float64(m.loss),
-                      Int(m.iterations), _build_container(resp), resp.plot_data)
+    empty = Dict{String, Float64}()
+    return VennFit{S}(
+        shapes,
+        empty,
+        fitted,
+        empty,
+        empty,
+        Float64(m.diag_error),
+        Float64(m.stress),
+        Float64(m.loss),
+        Int(m.iterations),
+        _build_container(resp),
+        resp.plot_data,
+    )
 end
 
 # ---------------------------------------------------------------------------
@@ -269,8 +313,15 @@ _shape_kind(::Type{S}) where {S} = lowercase(string(nameof(S)))
 function Base.show(io::IO, ::MIME"text/plain", fit::EulerFit{S}) where {S}
     n = length(fit.shapes)
     kind = n == 0 ? "shapes" : _shape_kind(S) * "s"
-    @printf(io, "EulerFit (%d %s, diag_error=%.4g, stress=%.4g, loss=%.4g)",
-            n, kind, fit.diag_error, fit.stress, fit.loss)
+    @printf(
+        io,
+        "EulerFit (%d %s, diag_error=%.4g, stress=%.4g, loss=%.4g)",
+        n,
+        kind,
+        fit.diag_error,
+        fit.stress,
+        fit.loss,
+    )
 
     labels = sort!(collect(keys(fit.original_values)))
     isempty(labels) && return
@@ -293,6 +344,5 @@ end
 function Base.show(io::IO, ::MIME"text/plain", fit::VennFit{S}) where {S}
     names = [s.set for s in fit.shapes]
     kind = isempty(fit.shapes) ? "shape" : _shape_kind(S)
-    print(io, "VennFit (", length(names), " sets [", kind, "]: ",
-          join(names, ", "), ")")
+    print(io, "VennFit (", length(names), " sets [", kind, "]: ", join(names, ", "), ")")
 end

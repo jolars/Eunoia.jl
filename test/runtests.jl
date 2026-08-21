@@ -6,14 +6,15 @@ using Test
 # built `libeunoia_capi` (in a checkout of jolars/eunoia: `cargo build -p
 # eunoia-capi --release`), or provide an `Artifacts.toml` (see
 # `gen/generate_artifacts.jl`) so the binary is fetched lazily.
-if !haskey(ENV, "EUNOIA_CAPI_LIB") &&
-   !isfile(joinpath(@__DIR__, "..", "Artifacts.toml"))
-    error("""
+if !haskey(ENV, "EUNOIA_CAPI_LIB") && !isfile(joinpath(@__DIR__, "..", "Artifacts.toml"))
+    error(
+        """
           No eunoia native library available for the test run.
 
           Set ENV["EUNOIA_CAPI_LIB"] to a locally built libeunoia_capi, or add
           an Artifacts.toml. See the "Local development" section of the README.
-          """)
+          """,
+    )
 end
 
 using Eunoia
@@ -24,7 +25,7 @@ using Eunoia
     end
 
     @testset "euler circles" begin
-        fit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0); seed=1)
+        fit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0); seed = 1)
         @test fit isa EulerFit
         @test length(fit.shapes) == 2
         @test fit.shapes[1] isa Circle
@@ -34,21 +35,24 @@ using Eunoia
         @test fit.shapes[1].label_anchor isa Point
         @test haskey(fit.original_values, "A")
         @test haskey(fit.fitted_values, "A")
-        @test fit.residuals["A&B"] ≈
-              fit.original_values["A&B"] - fit.fitted_values["A&B"]
+        @test fit.residuals["A&B"] ≈ fit.original_values["A&B"] - fit.fitted_values["A&B"]
         @test fit.container === nothing
     end
 
     @testset "euler ellipses with complement" begin
-        fit = euler(Dict("A" => 4.0, "B" => 2.0, "A&B" => 1.0);
-                    shape="ellipse", complement=3.0, seed=2)
+        fit = euler(
+            Dict("A" => 4.0, "B" => 2.0, "A&B" => 1.0);
+            shape = "ellipse",
+            complement = 3.0,
+            seed = 2,
+        )
         @test fit.shapes[1] isa Ellipse
         @test fit.container isa Container
         @test fit.container.width > 0
     end
 
     @testset "venn ellipses" begin
-        fit = venn(["A", "B", "C"]; shape="ellipse")
+        fit = venn(["A", "B", "C"]; shape = "ellipse")
         @test fit isa VennFit
         @test length(fit.shapes) == 3
         @test fit.shapes[1] isa Ellipse
@@ -58,7 +62,7 @@ using Eunoia
         plain = venn(3)
         @test plain.container === nothing
 
-        fit = venn(3; complement=5.0)
+        fit = venn(3; complement = 5.0)
         @test fit isa VennFit
         @test fit.container isa Container
         @test fit.container.width > 0
@@ -66,7 +70,7 @@ using Eunoia
 
     @testset "rotated rectangles" begin
         # A 4-set Venn is the canonical rotated-rectangle layout.
-        vfit = venn(4; shape="rotated_rectangle")
+        vfit = venn(4; shape = "rotated_rectangle")
         @test vfit isa VennFit
         @test length(vfit.shapes) == 4
         @test eltype(vfit.shapes) == RotatedRectangle
@@ -75,14 +79,17 @@ using Eunoia
         @test vfit.shapes[1].rotation isa Float64
 
         # Rotated rectangles also fit area-proportionally in `euler`.
-        efit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0);
-                     shape="rotated_rectangle", seed=1)
+        efit = euler(
+            Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0);
+            shape = "rotated_rectangle",
+            seed = 1,
+        )
         @test efit.shapes[1] isa RotatedRectangle
     end
 
     @testset "membership-list input" begin
         # x→{A}, y→{A,B}, z→{A,B}, w→{B}
-        fit = euler(Dict("A" => ["x", "y", "z"], "B" => ["y", "z", "w"]); seed=1)
+        fit = euler(Dict("A" => ["x", "y", "z"], "B" => ["y", "z", "w"]); seed = 1)
         @test fit isa EulerFit
         @test length(fit.shapes) == 2
         @test fit.original_values["A"] == 1.0
@@ -91,29 +98,34 @@ using Eunoia
     end
 
     @testset "inclusive input reconstruction" begin
-        fit = euler(Dict("A" => 13.0, "B" => 8.0, "A&B" => 3.0);
-                    input_type="inclusive", seed=1)
+        fit = euler(
+            Dict("A" => 13.0, "B" => 8.0, "A&B" => 3.0);
+            input_type = "inclusive",
+            seed = 1,
+        )
         # original_values stay in the user's (inclusive) scale
         @test fit.original_values["A"] == 13.0
         @test fit.original_values["A&B"] == 3.0
         # a 2-set circle case fits exactly, so fitted ≈ original in that scale
-        @test isapprox(fit.fitted_values["A"], 13.0; atol=1e-6)
-        @test isapprox(fit.fitted_values["B"], 8.0; atol=1e-6)
-        @test isapprox(fit.fitted_values["A&B"], 3.0; atol=1e-6)
+        @test isapprox(fit.fitted_values["A"], 13.0; atol = 1.0e-6)
+        @test isapprox(fit.fitted_values["B"], 8.0; atol = 1.0e-6)
+        @test isapprox(fit.fitted_values["A&B"], 3.0; atol = 1.0e-6)
     end
 
     @testset "venn input forms" begin
-        by_int = venn(3; shape="ellipse")
+        by_int = venn(3; shape = "ellipse")
         @test [s.set for s in by_int.shapes] == ["A", "B", "C"]
 
-        by_map = venn(Dict("A&B" => 1.0, "C" => 1.0); shape="ellipse")
+        by_map = venn(Dict("A&B" => 1.0, "C" => 1.0); shape = "ellipse")
         @test Set(s.set for s in by_map.shapes) == Set(["A", "B", "C"])
     end
 
     @testset "input errors" begin
         # membership + inclusive is contradictory
         @test_throws ErrorException euler(
-            Dict("A" => ["x"], "B" => ["y"]); input_type="inclusive")
+            Dict("A" => ["x"], "B" => ["y"]);
+            input_type = "inclusive",
+        )
         # mixed membership/area values are ambiguous
         @test_throws ErrorException euler(Dict("A" => ["x"], "B" => 2.0))
         # venn rejects a bare string and a Bool
@@ -122,7 +134,7 @@ using Eunoia
     end
 
     @testset "region_error and plot_data" begin
-        fit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0); seed=1)
+        fit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0); seed = 1)
         @test haskey(fit.region_error, "A&B")
         @test fit.region_error["A&B"] >= 0
         # plot_data carries renderable geometry for plotting
@@ -136,29 +148,41 @@ using Eunoia
         base = Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0)
 
         # Loss + numeric knobs are accepted and produce a populated fit.
-        fit = euler(base; seed=1, loss="sum_absolute", n_restarts=3,
-                    max_iterations=50, tolerance=1e-4, jobs=1)
+        fit = euler(
+            base;
+            seed = 1,
+            loss = "sum_absolute",
+            n_restarts = 3,
+            max_iterations = 50,
+            tolerance = 1.0e-4,
+            jobs = 1,
+        )
         @test fit isa EulerFit
         @test length(fit.shapes) == 2
         @test fit.loss >= 0
 
         # Smooth loss with an explicit eps.
-        @test euler(base; seed=1, loss="smooth_diag_error", loss_eps=0.01) isa
-              EulerFit
+        @test euler(base; seed = 1, loss = "smooth_diag_error", loss_eps = 0.01) isa
+            EulerFit
 
         # Solver / sampler knobs.
-        @test euler(base; seed=1, optimizer="levenberg_marquardt",
-                    mds_solver="lbfgs", initial_sampler="latin_hypercube") isa
-              EulerFit
+        @test euler(
+            base;
+            seed = 1,
+            optimizer = "levenberg_marquardt",
+            mds_solver = "lbfgs",
+            initial_sampler = "latin_hypercube",
+        ) isa
+            EulerFit
 
         # Optimizers exposed by capi 1.7.
-        @test euler(base; seed=1, optimizer="mads") isa EulerFit
-        @test euler(base; seed=1, optimizer="cmaes") isa EulerFit
+        @test euler(base; seed = 1, optimizer = "mads") isa EulerFit
+        @test euler(base; seed = 1, optimizer = "cmaes") isa EulerFit
 
         # `max_sets` reaches the spec builder: lowering it below the set count
         # makes the native fit fail; the default cap fits.
-        @test_throws ErrorException euler(base; seed=1, max_sets=1)
-        @test euler(base; seed=1, max_sets=32) isa EulerFit
+        @test_throws ErrorException euler(base; seed = 1, max_sets = 1)
+        @test euler(base; seed = 1, max_sets = 32) isa EulerFit
     end
 
     @testset "plot knobs" begin
@@ -166,23 +190,30 @@ using Eunoia
 
         # `n_vertices` is observable end-to-end: it sets how densely each set's
         # outline is polygonized in `plot_data.shape_outlines`.
-        coarse = euler(base; seed=1, n_vertices=40, label_precision=0.05,
-                       sliver_threshold=1e-2)
+        coarse = euler(
+            base;
+            seed = 1,
+            n_vertices = 40,
+            label_precision = 0.05,
+            sliver_threshold = 1.0e-2,
+        )
         @test coarse isa EulerFit
-        default = euler(base; seed=1)
+        default = euler(base; seed = 1)
         @test length(coarse.plot_data.shape_outlines.A) <
-              length(default.plot_data.shape_outlines.A)
+            length(default.plot_data.shape_outlines.A)
         @test 30 <= length(coarse.plot_data.shape_outlines.A) <= 60
     end
 
     @testset "label placement" begin
         base = Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0)
-        fit = euler(base; seed=1)
+        fit = euler(base; seed = 1)
 
         # Tiny labels fit inside every region: interior placement, no leader.
-        small = place_labels(fit, Dict("A" => (0.1, 0.1), "B" => (0.1, 0.1),
-                                       "A&B" => (0.05, 0.05)))
-        @test small isa Dict{String,LabelPlacement}
+        small = place_labels(fit, Dict("A" => (0.1, 0.1), "B" => (0.1, 0.1), "A&B" => (
+            0.05,
+            0.05,
+        )))
+        @test small isa Dict{String, LabelPlacement}
         for combo in ("A", "B", "A&B")
             @test haskey(small, combo)
             @test small[combo].kind === :interior
@@ -191,22 +222,27 @@ using Eunoia
         end
 
         # An oversized label can't fit, so it is pushed outside with a leader.
-        big = place_labels(fit, Dict("A&B" => (10.0, 10.0));
-                           placement="force_directed")
+        big = place_labels(fit, Dict("A&B" => (10.0, 10.0)); placement = "force_directed")
         p = big["A&B"]
         @test startswith(String(p.kind), "exterior_")
         @test p.tether isa Eunoia.Point
         @test p.leader_end isa Eunoia.Point
 
         # Bad enum tokens are rejected by the native core.
-        @test_throws ErrorException place_labels(fit, Dict("A" => (0.1, 0.1));
-                                                 placement="bogus")
-        @test_throws ErrorException place_labels(fit, Dict("A" => (0.1, 0.1));
-                                                 tether="middle")
+        @test_throws ErrorException place_labels(
+            fit,
+            Dict("A" => (0.1, 0.1));
+            placement = "bogus",
+        )
+        @test_throws ErrorException place_labels(
+            fit,
+            Dict("A" => (0.1, 0.1));
+            tether = "middle",
+        )
     end
 
     @testset "show" begin
-        fit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0); seed=1)
+        fit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0); seed = 1)
         str = sprint(show, MIME("text/plain"), fit)
         @test occursin("EulerFit", str)
         @test occursin("original", str)
@@ -218,16 +254,16 @@ using Eunoia
     end
 
     @testset "errors surface, don't crash" begin
-        @test_throws ErrorException euler(Dict("A" => 1.0); shape="hexagon")
+        @test_throws ErrorException euler(Dict("A" => 1.0); shape = "hexagon")
         # Invalid enum knobs are rejected by the native core.
-        @test_throws ErrorException euler(Dict("A" => 1.0); loss="frobnicate")
-        @test_throws ErrorException euler(Dict("A" => 1.0); optimizer="genetic")
-        @test_throws ErrorException euler(Dict("A" => 1.0); mds_solver="gauss")
-        @test_throws ErrorException euler(Dict("A" => 1.0); initial_sampler="sobol")
+        @test_throws ErrorException euler(Dict("A" => 1.0); loss = "frobnicate")
+        @test_throws ErrorException euler(Dict("A" => 1.0); optimizer = "genetic")
+        @test_throws ErrorException euler(Dict("A" => 1.0); mds_solver = "gauss")
+        @test_throws ErrorException euler(Dict("A" => 1.0); initial_sampler = "sobol")
     end
 
     @testset "plotting stubs error without a backend" begin
-        fit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0); seed=1)
+        fit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0); seed = 1)
         # Until a Makie backend triggers the extension, the stubs explain how to
         # enable plotting instead of throwing a MethodError.
         if Base.get_extension(Eunoia, :EunoiaMakieExt) === nothing
@@ -245,7 +281,7 @@ include(joinpath(@__DIR__, "aqua.jl"))
 if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
     import Pkg
     Pkg.activate(joinpath(@__DIR__, "makie"))
-    Pkg.develop(path=normpath(joinpath(@__DIR__, "..")))
+    Pkg.develop(path = normpath(joinpath(@__DIR__, "..")))
     Pkg.instantiate()
     using CairoMakie
     const MK = CairoMakie.Makie
@@ -271,7 +307,7 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
     @testset "Makie extension" begin
         @test Base.get_extension(Eunoia, :EunoiaMakieExt) !== nothing
 
-        fit = euler(Dict("A" => 10.0, "B" => 5.0, "A&B" => 3.0); seed=1)
+        fit = euler(Dict("A" => 10.0, "B" => 5.0, "A&B" => 3.0); seed = 1)
 
         @testset "figure + primitives" begin
             fap = eunoiaplot(fit)
@@ -281,17 +317,16 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
             @test fap.axis.xticksvisible[] == false
             @test fap.axis.bottomspinevisible[] == false
             p = fap.plot
-            @test npoly(p) >= 3            # A-only, B-only, A&B region fills
-            @test nlines(p) >= 2           # one outline per set
+            @test npoly(p) >= 3 # A-only, B-only, A&B region fills
+            @test nlines(p) >= 2 # one outline per set
             @test "A" in texts(p) && "B" in texts(p)
-            @test (MK.colorbuffer(fap.figure); true)   # headless render smoke test
+            @test (MK.colorbuffer(fap.figure); true) # headless render smoke test
         end
 
         @testset "edge colors" begin
             # These labels fit inside their regions, so no leader lines are
             # drawn and every Lines plot is a set outline.
-            outline_colors(p) = [MK.to_color(x.color[])
-                                 for x in p.plots if x isa MK.Lines]
+            outline_colors(p) = [MK.to_color(x.color[]) for x in p.plots if x isa MK.Lines]
 
             # Default: black outlines, regardless of fill colors.
             dc = outline_colors(eunoiaplot(fit).plot)
@@ -299,45 +334,49 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
             @test all(c -> c == MK.to_color(:black), dc)
 
             # `edges = :match` colors each outline with its set's fill color.
-            mc = outline_colors(eunoiaplot(fit; edges=:match,
-                                           colors=[:red, :blue]).plot)
+            mc = outline_colors(
+                eunoiaplot(fit; edges = :match, colors = [:red, :blue]).plot,
+            )
             @test MK.to_color(:red) in mc && MK.to_color(:blue) in mc
             @test !any(c -> c == MK.to_color(:black), mc)
 
             # An explicit edge color still wins over the black default.
-            gc = outline_colors(eunoiaplot(fit; edges=Dict(:color => :green)).plot)
+            gc = outline_colors(eunoiaplot(fit; edges = Dict(:color => :green)).plot)
             @test all(c -> c == MK.to_color(:green), gc)
         end
 
         @testset "labels off" begin
-            t = texts(eunoiaplot(fit; labels=false).plot)
+            t = texts(eunoiaplot(fit; labels = false).plot)
             @test !("A" in t) && !("B" in t)
         end
 
         @testset "labels per-set replacement" begin
-            t = texts(eunoiaplot(fit; labels=Dict("A" => "Group A")).plot)
+            t = texts(eunoiaplot(fit; labels = Dict("A" => "Group A")).plot)
             @test "Group A" in t
             @test "B" in t
-            @test !("A" in t)              # A replaced
+            @test !("A" in t) # A replaced
         end
 
         @testset "quantities" begin
-            t = texts(eunoiaplot(fit; quantities=true).plot)
-            @test any(s -> occursin("10", s), t)        # original count of A
-            tp = texts(eunoiaplot(fit; quantities="percent").plot)
+            t = texts(eunoiaplot(fit; quantities = true).plot)
+            @test any(s -> occursin("10", s), t) # original count of A
+            tp = texts(eunoiaplot(fit; quantities = "percent").plot)
             @test any(s -> endswith(s, "%"), tp)
         end
 
         @testset "legend hides inline labels + adds a Legend block" begin
-            fap = eunoiaplot(fit; legend=true)
+            fap = eunoiaplot(fit; legend = true)
             @test any(c -> c isa Legend, fap.figure.content)
-            @test isempty(texts(fap.plot))              # inline labels default off
+            @test isempty(texts(fap.plot)) # inline labels default off
         end
 
         @testset "complement draws a container box" begin
             plain = eunoiaplot(fit).plot
-            withc = eunoiaplot(euler(Dict("A" => 4.0, "B" => 2.0, "A&B" => 1.0);
-                                     complement=3.0, seed=2)).plot
+            withc = eunoiaplot(euler(
+                Dict("A" => 4.0, "B" => 2.0, "A&B" => 1.0);
+                complement = 3.0,
+                seed = 2,
+            )).plot
             @test npoly(withc) == npoly(plain) + 1
         end
 
@@ -350,7 +389,7 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
 
         @testset "draw into a layout cell" begin
             f = Figure()
-            ap = eunoiaplot(f[1, 2], fit; axis=(; title="panel"))
+            ap = eunoiaplot(f[1, 2], fit; axis = (; title = "panel"))
             @test ap isa MK.AxisPlot
             @test ap.axis isa Axis
             # The cell axis is diagram-configured, not a bare Axis.
@@ -363,78 +402,124 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
 
         @testset "ellipse / square / rectangle / rotated_rectangle render" begin
             for shp in ("ellipse", "square", "rectangle", "rotated_rectangle")
-                p = eunoiaplot(euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0);
-                                     shape=shp, seed=1)).plot
+                p = eunoiaplot(euler(
+                    Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0);
+                    shape = shp,
+                    seed = 1,
+                )).plot
                 @test npoly(p) >= 3
             end
         end
 
         @testset "venn renders" begin
-            p = eunoiaplot(venn(["A", "B", "C"]; shape="ellipse")).plot
+            p = eunoiaplot(venn(["A", "B", "C"]; shape = "ellipse")).plot
             @test npoly(p) >= 1
             @test (MK.colorbuffer(eunoiaplot(venn(3)).figure); true)
 
             # A rotated-rectangle 4-set Venn with a complement frame renders.
-            vr = eunoiaplot(venn(4; shape="rotated_rectangle", complement=2.0);
-                            complement=Dict(:color => "#eeeeee")).plot
-            @test npoly(vr) >= 5            # ≥4 region fills + container box
+            vr = eunoiaplot(
+                venn(4; shape = "rotated_rectangle", complement = 2.0);
+                complement = Dict(:color => "#eeeeee"),
+            ).plot
+            @test npoly(vr) >= 5 # ≥4 region fills + container box
         end
 
         @testset "collision-aware placement" begin
             # Interior placement: set names + counts combine into one box per
             # region; nothing is drawn twice (recipe defers to the wrapper).
-            fap = eunoiaplot(fit; label_placement=true, quantities=true)
+            fap = eunoiaplot(fit; label_placement = true, quantities = true)
             t = texts(fap.plot)
-            @test "A" in t && "B" in t          # set names placed
-            @test count(==("A"), t) == 1        # not double-drawn
-            @test any(s -> occursin("10", s), t)  # A's count
+            @test "A" in t && "B" in t # set names placed
+            @test count(==("A"), t) == 1 # not double-drawn
+            @test any(s -> occursin("10", s), t) # A's count
             @test (MK.colorbuffer(fap.figure); true)
 
             # Tiny intersections + a large font push the small-region labels
             # outside, drawing leader lines beyond the per-set outlines.
-            crowded = euler(Dict("Apple" => 6.0, "Banana" => 6.0, "Cherry" => 6.0,
-                                 "Apple&Banana" => 0.6, "Banana&Cherry" => 0.6,
-                                 "Apple&Cherry" => 0.6, "Apple&Banana&Cherry" => 0.2);
-                            seed=4)
-            for strat in (true, (; placement="force_directed"), (; leader="elbow"))
-                fp = eunoiaplot(crowded; label_placement=strat, quantities=true,
-                                fontsize=26, figure=(; size=(620, 540)))
-                @test nlines(fp.plot) > 3       # 3 outlines + ≥1 leader
+            crowded = euler(
+                Dict(
+                    "Apple" => 6.0,
+                    "Banana" => 6.0,
+                    "Cherry" => 6.0,
+                    "Apple&Banana" => 0.6,
+                    "Banana&Cherry" => 0.6,
+                    "Apple&Cherry" => 0.6,
+                    "Apple&Banana&Cherry" => 0.2,
+                );
+                seed = 4,
+            )
+            for strat in (true, (; placement = "force_directed"), (; leader = "elbow"))
+                fp = eunoiaplot(
+                    crowded;
+                    label_placement = strat,
+                    quantities = true,
+                    fontsize = 26,
+                    figure = (; size = (620, 540)),
+                )
+                @test nlines(fp.plot) > 3 # 3 outlines + ≥1 leader
                 @test (MK.colorbuffer(fp.figure); true)
             end
 
             # Placement is on by default (raycast): the same crowded diagram
             # draws leaders even without an explicit `label_placement` kwarg.
-            dflt = eunoiaplot(crowded; quantities=true, fontsize=26,
-                              figure=(; size=(620, 540)))
+            dflt = eunoiaplot(
+                crowded;
+                quantities = true,
+                fontsize = 26,
+                figure = (; size = (620, 540)),
+            )
             @test nlines(dflt.plot) > 3
 
             # A set with zero exclusive area is hosted in an intersection region
             # (here C → A&B&C, via the core's `set_anchor_regions`); its name is
             # combined into that region's box and drawn exactly once.
-            contained = euler(Dict("A" => 7.0, "B" => 6.0, "C" => 0.0, "A&B" => 0.0,
-                                   "A&C" => 1.0, "B&C" => 1.0, "A&B&C" => 2.0);
-                              shape="ellipse", seed=1)
-            tc = texts(eunoiaplot(contained; quantities=true).plot)
+            contained = euler(
+                Dict(
+                    "A" => 7.0,
+                    "B" => 6.0,
+                    "C" => 0.0,
+                    "A&B" => 0.0,
+                    "A&C" => 1.0,
+                    "B&C" => 1.0,
+                    "A&B&C" => 2.0,
+                );
+                shape = "ellipse",
+                seed = 1,
+            )
+            tc = texts(eunoiaplot(contained; quantities = true).plot)
             @test count(==("C"), tc) == 1
 
             # Leader styling is forwarded to the leader lines.
-            fs = eunoiaplot(crowded; label_placement=true, quantities=true, fontsize=26,
-                            figure=(; size=(620, 540)),
-                            leader_style=(; color=:red, linewidth=2.0))
+            fs = eunoiaplot(
+                crowded;
+                label_placement = true,
+                quantities = true,
+                fontsize = 26,
+                figure = (; size = (620, 540)),
+                leader_style = (; color = :red, linewidth = 2.0),
+            )
             @test any(x -> x isa MK.Lines && x.color[] == MK.to_color(:red), fs.plot.plots)
 
             # A label larger than the viewport would diverge the scale loop; the
             # guard keeps the view bounded and the render finite.
-            big = euler(Dict("LongNameAlpha" => 4.0, "LongNameBeta" => 4.0,
-                             "LongNameAlpha&LongNameBeta" => 3.5); seed=1)
-            fb = eunoiaplot(big; label_placement=true, fontsize=40, figure=(; size=(120, 100)))
+            big = euler(
+                Dict(
+                    "LongNameAlpha" => 4.0,
+                    "LongNameBeta" => 4.0,
+                    "LongNameAlpha&LongNameBeta" => 3.5,
+                );
+                seed = 1,
+            )
+            fb = eunoiaplot(big; label_placement = true, fontsize = 40, figure = (; size = (
+                120,
+                100,
+            )))
             @test all(isfinite, MK.widths(fb.axis.finallimits[]))
-            @test maximum(MK.widths(fb.axis.finallimits[])) < 1e4
+            @test maximum(MK.widths(fb.axis.finallimits[])) < 1.0e4
             @test (MK.colorbuffer(fb.figure); true)
 
             # `label_placement=false` opts out to the raw-anchor path.
-            @test "A" in texts(eunoiaplot(fit; label_placement=false).plot)
+            @test "A" in texts(eunoiaplot(fit; label_placement = false).plot)
         end
     end
 end

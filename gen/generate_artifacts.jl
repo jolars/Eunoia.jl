@@ -26,10 +26,16 @@ const ARTIFACTS_TOML = normpath(joinpath(@__DIR__, "..", "Artifacts.toml"))
 # (Julia platform, tarball basename). The tarball names mirror the CI matrix's
 # `julia` triplet column.
 const TARGETS = [
-    (Platform("x86_64", "linux"; libc="glibc"), "libeunoia_capi-x86_64-linux-gnu.tar.gz"),
-    (Platform("aarch64", "linux"; libc="glibc"), "libeunoia_capi-aarch64-linux-gnu.tar.gz"),
-    (Platform("x86_64", "linux"; libc="musl"), "libeunoia_capi-x86_64-linux-musl.tar.gz"),
-    (Platform("aarch64", "linux"; libc="musl"), "libeunoia_capi-aarch64-linux-musl.tar.gz"),
+    (Platform("x86_64", "linux"; libc = "glibc"), "libeunoia_capi-x86_64-linux-gnu.tar.gz"),
+    (
+        Platform("aarch64", "linux"; libc = "glibc"),
+        "libeunoia_capi-aarch64-linux-gnu.tar.gz",
+    ),
+    (Platform("x86_64", "linux"; libc = "musl"), "libeunoia_capi-x86_64-linux-musl.tar.gz"),
+    (
+        Platform("aarch64", "linux"; libc = "musl"),
+        "libeunoia_capi-aarch64-linux-musl.tar.gz",
+    ),
     (Platform("x86_64", "macos"), "libeunoia_capi-x86_64-apple-darwin.tar.gz"),
     (Platform("aarch64", "macos"), "libeunoia_capi-aarch64-apple-darwin.tar.gz"),
     (Platform("x86_64", "windows"), "libeunoia_capi-x86_64-w64-mingw32.tar.gz"),
@@ -38,14 +44,11 @@ const TARGETS = [
 for (i, (platform, tarball)) in enumerate(TARGETS)
     url = "$BASE/$tarball"
     @info "adding artifact" platform url
-    add_artifact!(
-        ARTIFACTS_TOML,
-        "eunoia",
-        url;
-        platform=platform,
-        lazy=true,            # download on first use, not at install time
-        force=true,
-        clear=(i == 1),       # wipe stale entries on the first call only
+    add_artifact!(ARTIFACTS_TOML, "eunoia", url;
+        platform = platform,
+        lazy = true,            # download on first use, not at install time
+        force = true,
+        clear = (i == 1),       # wipe stale entries on the first call only
     )
 end
 

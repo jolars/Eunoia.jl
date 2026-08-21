@@ -4,7 +4,7 @@
 # `(combination, size)` pairs and reconstructs fitted areas in the user's scale.
 
 # Value types that mark a membership-list input (vs. a region area).
-const _MEMBERSHIP_TYPES = Union{AbstractVector,AbstractSet,Tuple}
+const _MEMBERSHIP_TYPES = Union{AbstractVector, AbstractSet, Tuple}
 
 """
     canonicalize(combo) -> String
@@ -30,9 +30,11 @@ function is_membership_input(input::AbstractDict)
     isempty(input) && return false
     flags = [isa(v, _MEMBERSHIP_TYPES) for v in Base.values(input)]
     all(flags) && return true
-    any(flags) && error(
-        "invalid_input: mix of membership collections and non-collections; " *
-        "values must be all areas or all membership lists")
+    any(flags) &&
+        error(
+            "invalid_input: mix of membership collections and non-collections; " *
+                "values must be all areas or all membership lists",
+        )
     return false
 end
 
@@ -44,13 +46,13 @@ assigned to the canonical combination of the sets it belongs to, deduplicated
 within a set and stringified, then counted per region.
 """
 function parse_membership_input(input::AbstractDict)
-    membership = Dict{String,Set{String}}()
+    membership = Dict{String, Set{String}}()
     for (set_name, members) in input
         for element in Set(members)
             push!(get!(membership, string(element), Set{String}()), String(set_name))
         end
     end
-    counts = Dict{String,Float64}()
+    counts = Dict{String, Float64}()
     for sets in Base.values(membership)
         isempty(sets) && continue
         combo = canonicalize(join(sort!(collect(sets)), "&"))
@@ -68,7 +70,7 @@ superset of `X`. Used to express fitted areas in the user's input scale when
 """
 function to_inclusive(fitted_exclusive, keys)
     _sets(s) = Set(filter(!isempty, [String(strip(p)) for p in split(s, '&')]))
-    result = Dict{String,Float64}()
+    result = Dict{String, Float64}()
     for k in keys
         x_sets = _sets(k)
         total = 0.0
@@ -97,7 +99,8 @@ function _resolve_names(sets)
     # Bool <: Integer in Julia; reject it explicitly to avoid `venn(true)`.
     if isa(sets, Bool)
         throw(ArgumentError(
-            "venn: 'sets' must be an Integer, a vector of names, or a mapping"))
+            "venn: 'sets' must be an Integer, a vector of names, or a mapping",
+        ))
     elseif isa(sets, Integer)
         sets < 1 && throw(ArgumentError("venn: number of sets must be >= 1"))
         return [_default_name(i) for i in 1:sets]

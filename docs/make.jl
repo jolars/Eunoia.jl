@@ -6,27 +6,23 @@ using Eunoia
 changelog = joinpath(@__DIR__, "../CHANGELOG.md")
 pages = ["Home" => "index.md", "Gallery" => "gallery.md", "API Reference" => "api.md"]
 if isfile(changelog)
-  cp(changelog, joinpath(@__DIR__, "src/CHANGELOG.md"); force=true)
-  push!(pages, "Changelog" => "CHANGELOG.md")
+    cp(changelog, joinpath(@__DIR__, "src/CHANGELOG.md"); force = true)
+    push!(pages, "Changelog" => "CHANGELOG.md")
 end
 
 # Determining the repo remote (for "source"/"edit" links) shells out to `git`,
 # which fails on systems that can't run the bundled Git_jll binary (e.g. NixOS
 # without nix-ld). CI runs git fine, so keep the links there; for local builds
 # (including `servedocs`) disable remotes so previewing still works.
-extra = haskey(ENV, "GITHUB_ACTIONS") ? (;) : (; remotes=nothing)
+extra = haskey(ENV, "GITHUB_ACTIONS") ? (;) : (; remotes = nothing)
 
 makedocs(;
-  sitename="Eunoia",
-  format=Documenter.HTML(
-    assets=["assets/favicon.ico"],
-  ),
-  modules=[Eunoia],
-  checkdocs=:exports,
-  pages=pages,
-  extra...,
+    sitename = "Eunoia",
+    format = Documenter.HTML(assets = ["assets/favicon.ico"]),
+    modules = [Eunoia],
+    checkdocs = :exports,
+    pages = pages,
+    extra...,
 )
 
-deploydocs(
-  repo="github.com/jolars/Eunoia.jl.git"
-)
+deploydocs(repo = "github.com/jolars/Eunoia.jl.git")
