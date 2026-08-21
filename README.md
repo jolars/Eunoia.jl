@@ -79,6 +79,9 @@ using Eunoia, CairoMakie   # or GLMakie/WGLMakie
 fit = euler(Dict("A" => 5, "B" => 3, "A&B" => 1.5))
 eunoiaplot(fit)                                # publication-ready figure
 eunoiaplot(fit; quantities = true, legend = true)
+eunoiaplot(fit; set_label_placement = true)    # names hug shape exteriors
+eunoiaplot(fit; glyphs = Dict("A" => 5, "B" => 3, "A&B" => 1))
+eunoiaplot(fit; members = Dict("A" => ["Ada", "Grace"], "B" => ["Alan"]))
 ```
 
 `eunoiaplot(fit)` returns a `Makie.FigureAxisPlot` with equal aspect and no axis
@@ -89,12 +92,19 @@ mirror the `eunoia-py` `plot()` API:
 - `colors`: a vector (set order) or `Dict(name => color)`; region fills blend
   the member colors perceptually (OKLab).
 - `fills`, `edges`: per-region/per-set style overrides.
-- `labels`: `false`/true`, a per-set`Dict\`, or a uniform style.
+- `labels`: `false`/`true`, a per-set `Dict`, or a uniform style.
 - `quantities`: `false`/`true`, `"original"`/`"fitted"`, `"counts"`/`"percent"`,
   or a `Dict`.
 - `legend`: `false`/`true` or a `Dict` of `Legend` keywords.
 - `complement`: container-box style (drawn only for complement fits).
-- `placement`: opt into collision-aware label placement with leader lines.
+- `label_placement`: collision-aware region labels and leader lines.
+- `set_label_placement`: place set names outside their own shapes.
+- `glyphs`: explicit per-region counts rendered as packed circular marks.
+- `members`: explicit per-region member names packed as scaled text boxes.
+
+The placement helpers are also public for custom renderers: `place_labels`,
+`label_boxes`, `place_set_labels`, `place_glyphs`, and `place_glyph_boxes` return
+typed Julia results while the native library performs the geometry.
 
 ## The native library
 

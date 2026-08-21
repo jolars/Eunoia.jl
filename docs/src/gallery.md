@@ -391,6 +391,53 @@ eunoiaplot(f[1, 2], fit; quantities = "fitted", axis = (; title = "fitted"))
 f
 ```
 
+### Exterior Set Labels
+
+`set_label_placement = true` moves each set name outside its own shape, where it
+hugs the boundary without a leader. Region quantities remain collision-aware
+inside the diagram. A named tuple supplies the native set-label strategy knobs.
+
+```@example gallery
+fit = euler(Dict("Mammals" => 12, "Birds" => 9, "Mammals&Birds" => 3))
+eunoiaplot(fit; quantities = true, set_label_placement = (; angular_steps = 180))
+```
+
+### Countable Glyphs
+
+Pass explicit integer counts through `glyphs` to draw one equal-sized circular
+mark per unit. Eunoia chooses one radius for the entire diagram and keeps the
+marks clear of measured labels. Placement and Makie styling use separate option
+collections.
+
+```@example gallery
+fit = euler(Dict("A" => 12, "B" => 8, "A&B" => 4))
+eunoiaplot(
+    fit;
+    glyphs = Dict("A" => 12, "B" => 8, "A&B" => 4),
+    glyph_options = (; arrangement = "uniform", gap = 0.2),
+    glyph_style = (; strokecolor = :black),
+)
+```
+
+### Packed Member Names
+
+`members` is the text analogue of `glyphs`: supply ordered names per region,
+and Eunoia measures and packs their boxes at one readable scale. The two modes
+are alternatives and cannot be enabled together.
+
+```@example gallery
+fit = euler(Dict("A" => 4, "B" => 3, "A&B" => 2))
+eunoiaplot(
+    fit;
+    members = Dict(
+        "A" => ["Ada", "Grace", "Barbara"],
+        "B" => ["Alan", "Edsger"],
+        "A&B" => ["Katherine"],
+    ),
+    member_style = (; color = :navy),
+)
+```
+
 ### Counts and Percentages
 
 `quantities` also chooses *how* to display each region. A string picks the

@@ -241,6 +241,58 @@ using Eunoia
         )
     end
 
+    @testset "v1.9 placement API" begin
+        fit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0); seed=1)
+
+        matched = place_labels(fit, Dict("A&B" => (10.0, 10.0)); placement="matched")
+        @test matched["A&B"].kind === :exterior_matched
+
+        placements = place_labels(fit, Dict("A" => (0.2, 0.1)))
+        boxes = label_boxes(placements, Dict("A" => (0.2, 0.1)); padding=0.05)
+        @test boxes isa Vector{BoundingBox}
+        @test length(boxes) == 1
+        @test boxes[1].center == placements["A"].anchor
+        @test boxes[1].width ≈ 0.3
+        @test boxes[1].height ≈ 0.2
+
+        set_labels = place_set_labels(
+            fit,
+            Dict("A" => (0.3, 0.15), "B" => (0.3, 0.15));
+            obstacles=boxes,
+        )
+        @test Set(keys(set_labels)) == Set(["A", "B"])
+        @test all(p -> p.kind === :exterior_set, values(set_labels))
+        @test all(p -> p.tether === nothing, values(set_labels))
+
+        counts = Dict("A" => 5, "B" => 3, "A&B" => 2)
+        glyphs = place_glyphs(fit, counts; obstacles=boxes)
+        @test glyphs isa GlyphPlacements
+        @test glyphs.radius > 0
+        @test all(length(glyphs.positions[k]) == n for (k, n) in counts)
+        @test isempty(glyphs.unplaced)
+
+        random_a = place_glyphs(fit, counts; arrangement="random", seed=7)
+        random_b = place_glyphs(fit, counts; arrangement="random", seed=7)
+        @test random_a.positions == random_b.positions
+
+        overflow = place_glyphs(fit, Dict("A" => 5); radius=10.0)
+        @test get(overflow.unplaced, "A", 0) > 0
+
+        member_sizes = Dict("A" => [(0.2, 0.1), (0.3, 0.1)], "A&B" => [(0.2, 0.1)])
+        member_boxes = place_glyph_boxes(fit, member_sizes; obstacles=boxes)
+        @test member_boxes isa GlyphBoxPlacements
+        @test 0 < member_boxes.scale <= 1
+        @test length(member_boxes.boxes["A"]) == 2
+        @test member_boxes.boxes["A"][1] isa BoundingBox
+
+        @test_throws ArgumentError place_glyphs(fit, Dict("A" => -1))
+        @test_throws ArgumentError place_glyphs(fit, Dict("A" => 1.5))
+        @test_throws ErrorException place_glyphs(fit, Dict("A" => 1);
+                                                 arrangement="spiral")
+        @test_throws ErrorException place_glyph_boxes(fit, member_sizes;
+                                                      arrangement="spiral")
+    end
+
     @testset "show" begin
         fit = euler(Dict("A" => 5.0, "B" => 3.0, "A&B" => 1.0); seed = 1)
         str = sprint(show, MIME("text/plain"), fit)
@@ -291,6 +343,8 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
     # deeper, so we count at depth 1.
     npoly(p) = count(x -> x isa MK.Poly, p.plots)
     nlines(p) = count(x -> x isa MK.Lines, p.plots)
+    nscatter(p) = count(x -> x isa MK.Scatter, p.plots)
+    scatter_points(p) = sum(length(x[1][]) for x in p.plots if x isa MK.Scatter; init=0)
     # A single-position text!(...) stores its string as a 1-element vector, so
     # flatten each Text plot's `text` observable into the running list.
     function texts(p)
@@ -520,6 +574,34 @@ if get(ENV, "EUNOIA_TEST_MAKIE", "false") in ("true", "1")
 
             # `label_placement=false` opts out to the raw-anchor path.
             @test "A" in texts(eunoiaplot(fit; label_placement = false).plot)
+        end
+
+        @testset "set labels and glyphs" begin
+            outside = eunoiaplot(fit; set_label_placement=true, quantities=true)
+            outside_text = texts(outside.plot)
+            @test count(==("A"), outside_text) == 1
+            @test count(==("B"), outside_text) == 1
+            @test nlines(outside.plot) == 2
+            @test (MK.colorbuffer(outside.figure); true)
+
+            counts = Dict("A" => 5, "B" => 3, "A&B" => 2)
+            dots = eunoiaplot(fit; glyphs=counts, glyph_options=(; gap=0.1))
+            @test nscatter(dots.plot) == 3
+            @test scatter_points(dots.plot) == sum(values(counts))
+            @test (MK.colorbuffer(dots.figure); true)
+
+            member_names = Dict("A" => ["Ada", "Grace"], "B" => ["Alan"])
+            named = eunoiaplot(fit; members=member_names,
+                               member_style=(; color=:purple))
+            named_text = texts(named.plot)
+            @test all(name -> name in named_text, ["Ada", "Grace", "Alan"])
+            @test (MK.colorbuffer(named.figure); true)
+
+            @test_throws ArgumentError eunoiaplot(fit; glyphs=true)
+            @test_throws ArgumentError eunoiaplot(fit; members=true)
+            @test_throws ArgumentError eunoiaplot(
+                fit; glyphs=counts, members=member_names,
+            )
         end
     end
 end

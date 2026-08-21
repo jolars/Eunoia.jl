@@ -134,28 +134,65 @@ function eunoiaplot(
 end
 
 """
-    eunoiaplot!(ax, fit; label_placement=true, leader_style=(;), kwargs...)
+    eunoiaplot!(ax, fit; label_placement=true, set_label_placement=false,
+                glyphs=nothing, members=nothing, leader_style=(;), kwargs...)
 
 Draw a fit into an existing axis. By default (`label_placement=true`) labels are
 placed collision-aware via raycast (see [`Eunoia.eunoiaplot`](@ref) for the value
 forms); the resolved label boxes and any exterior leader polylines are drawn into
 `ax`. Pass `label_placement=false` to instead leave labels at their raw anchors.
-`leader_style` is a collection of `lines!` keywords for the leader lines.
+Set `set_label_placement=true` to move set names outside their shapes. Explicit
+`glyphs` and `members` mappings enable the two mutually exclusive glyph modes.
+`leader_style` is a collection of `lines!` keywords for leader lines.
 """
 function eunoiaplot!(
     ax,
     fit::AbstractEulerFit;
     label_placement = true,
+    set_label_placement = false,
+    glyphs = nothing,
+    glyph_options = (;),
+    glyph_style = (;),
+    members = nothing,
+    member_options = (;),
+    member_style = (;),
     leader_style = (;),
     kwargs...,
 )
-    if label_placement === false
+    label_placement isa Union{Bool, NamedTuple, AbstractDict} || throw(
+        ArgumentError("eunoia: label_placement must be false, true, a NamedTuple, or a Dict"),
+    )
+    set_label_placement isa Union{Bool, NamedTuple, AbstractDict} || throw(
+        ArgumentError(
+            "eunoia: set_label_placement must be false, true, a NamedTuple, or a Dict",
+        ),
+    )
+    glyphs_enabled = !(glyphs === nothing || glyphs === false)
+    members_enabled = !(members === nothing || members === false)
+    glyphs_enabled && members_enabled &&
+        throw(ArgumentError("eunoia: glyphs and members are mutually exclusive"))
+    glyphs === true &&
+        throw(ArgumentError("eunoia: glyphs requires an explicit region-to-count mapping"))
+    members === true &&
+        throw(ArgumentError("eunoia: members requires an explicit region-to-names mapping"))
+
+    advanced = set_label_placement !== false || glyphs_enabled || members_enabled
+    if label_placement === false && !advanced
         return eunoiadiagram!(ax, fit; kwargs...)
     end
-    # The recipe draws geometry only; we own the axis, so we run the
-    # measure → place → render loop and draw the labels + leaders ourselves.
     p = eunoiadiagram!(ax, fit; defer_labels = true, kwargs...)
-    place_and_draw_labels!(ax, p, fit, label_placement, leader_style)
+    place_and_draw_content!(
+        ax, p, fit;
+        label_placement = label_placement,
+        set_label_placement = set_label_placement,
+        glyphs = glyphs_enabled ? glyphs : nothing,
+        glyph_options = glyph_options,
+        glyph_style = glyph_style,
+        members = members_enabled ? members : nothing,
+        member_options = member_options,
+        member_style = member_style,
+        leader_style = leader_style,
+    )
     return p
 end
 
@@ -657,7 +694,61 @@ function placement_bbox(geom, placements, sizes_data)
     return (xmin, xmax, ymin, ymax)
 end
 
-function place_and_draw_labels!(ax, p, fit, label_placement, leader_style)
+function raw_region_placements(pd, lines_by_region)
+    out = Dict{String, Eunoia.LabelPlacement}()
+    haskey(pd, :region_anchors) || return out
+    for combo in keys(lines_by_region)
+        haskey(pd.region_anchors, Symbol(combo)) || continue
+        anchor = pd.region_anchors[Symbol(combo)]
+        out[combo] = Eunoia.LabelPlacement(
+            Eunoia.Point(Float64(anchor[1]), Float64(anchor[2])),
+            :interior, nothing, nothing, Eunoia.Point[],
+        )
+    end
+    return out
+end
+
+function option_obstacles(options, automatic)
+    opts = _kw(options)
+    supplied = haskey(opts, :obstacles) && opts.obstacles !== nothing ?
+        collect(opts.obstacles) : Eunoia.BoundingBox[]
+    rest = haskey(opts, :obstacles) ?
+        Base.structdiff(opts, NamedTuple{(:obstacles,)}) : opts
+    obstacles = vcat(supplied, automatic)
+    return isempty(obstacles) ? rest : merge(rest, (; obstacles))
+end
+
+function placement_obstacles(placements, sizes, padding)
+    isempty(placements) && return Eunoia.BoundingBox[]
+    return Eunoia.label_boxes(placements, sizes; padding = padding)
+end
+
+function outside_set_lines(names, specs, show_labels, fontsize)
+    out = Dict{String, Vector{Tuple{String, Float64, Any}}}()
+    show_labels || return out
+    for name in names
+        spec = specs[name]
+        spec === nothing && continue
+        text, style = spec
+        out[name] = [(text, fontsize, style)]
+    end
+    return out
+end
+
+function place_and_draw_content!(
+    ax,
+    p,
+    fit;
+    label_placement,
+    set_label_placement,
+    glyphs,
+    glyph_options,
+    glyph_style,
+    members,
+    member_options,
+    member_style,
+    leader_style,
+)
     pd = fit.plot_data
     names = String[s.set for s in fit.shapes]
     base = resolve_colors(p.colors[], names)
@@ -668,46 +759,64 @@ function place_and_draw_labels!(ax, p, fit, label_placement, leader_style)
         Dict{String, Any}(n => nothing for n in names)
     qinfo = p.quantities[] === false ? nothing : resolve_quantities(p.quantities[])
 
+    outside_sets = set_label_placement !== false
     lines_by_region = region_label_lines(
         pd,
         fit,
         names,
         specs,
-        show_labels,
+        show_labels && !outside_sets,
         qinfo,
         fontsize,
     )
-    isempty(lines_by_region) && return
+    set_lines = outside_set_lines(names, specs, show_labels && outside_sets, fontsize)
 
     font = _label_font(ax)
     gap = 0.15 * fontsize
     boxes_px = Dict(
-        combo => measure_box(lines, font, gap)
-        for (combo, lines) in lines_by_region
+        combo => measure_box(lines, font, gap) for (combo, lines) in lines_by_region
     )
+    set_boxes_px =
+        Dict(name => measure_box(lines, font, gap) for (name, lines) in set_lines)
     strat = label_placement isa Union{NamedTuple, AbstractDict} ? _kw(label_placement) : (;)
+    set_strat = set_label_placement isa Union{NamedTuple, AbstractDict} ?
+        _kw(set_label_placement) : (;)
     geom = geom_bbox(fit)
 
     geom_extent = max(geom[2] - geom[1], geom[4] - geom[3])
     max_extent = MAX_BBOX_FACTOR * geom_extent
 
-    # Fixed-point loop: place at the current scale, grow the limits to fit, and
-    # repeat until the view extent settles. The kept `placements`/`sizes_data`
-    # always match the currently pinned limits, so the render is self-consistent.
     Makie.reset_limits!(ax)
     placements = Dict{String, Eunoia.LabelPlacement}()
+    set_placements = Dict{String, Eunoia.LabelPlacement}()
     sizes_data = Dict{String, Tuple{Float64, Float64}}()
+    set_sizes_data = Dict{String, Tuple{Float64, Float64}}()
     prev_extent = nothing
     for _ in 1:MAX_PLACE_ITERS
         sx, sy = axis_scale(ax)
         cand_sizes = Dict(combo => (w * sx, h * sy) for (combo, (w, h)) in boxes_px)
-        cand = Eunoia.place_labels(fit, cand_sizes; strat...)
+        cand = label_placement === false ? raw_region_placements(pd, lines_by_region) :
+            Eunoia.place_labels(fit, cand_sizes; strat...)
+        label_padding = 0.15 * fontsize * max(sx, sy)
+        region_obstacles = placement_obstacles(cand, cand_sizes, label_padding)
+
+        cand_set_sizes = Dict(name => (w * sx, h * sy)
+            for (name, (w, h)) in set_boxes_px)
+        cand_sets = if isempty(cand_set_sizes)
+            Dict{String, Eunoia.LabelPlacement}()
+        else
+            opts = option_obstacles(set_strat, region_obstacles)
+            Eunoia.place_set_labels(fit, cand_set_sizes; opts...)
+        end
+
         xmin, xmax, ymin, ymax = placement_bbox(geom, cand, cand_sizes)
+        xmin, xmax, ymin, ymax = placement_bbox(
+            (xmin, xmax, ymin, ymax), cand_sets, cand_set_sizes,
+        )
         extent = max(xmax - xmin, ymax - ymin)
-        # Diverging (label > viewport): drop this runaway step, keep the last
-        # sane layout and its pinned limits.
         !isempty(placements) && extent > max_extent && break
         placements, sizes_data = cand, cand_sizes
+        set_placements, set_sizes_data = cand_sets, cand_set_sizes
         prev_extent !== nothing &&
             abs(extent - prev_extent) <= PLACE_EXTENT_TOL * prev_extent &&
             break
@@ -717,7 +826,100 @@ function place_and_draw_labels!(ax, p, fit, label_placement, leader_style)
         Makie.reset_limits!(ax)
     end
 
+    sx, sy = axis_scale(ax)
+    padding = 0.15 * fontsize * max(sx, sy)
+    obstacles = vcat(
+        placement_obstacles(placements, sizes_data, padding),
+        placement_obstacles(set_placements, set_sizes_data, padding),
+    )
+    glyphs === nothing || draw_glyphs!(
+        p, fit, glyphs, glyph_options, glyph_style, obstacles, base,
+    )
+    members === nothing || draw_members!(
+        ax, p, fit, members, member_options, member_style, obstacles, fontsize, font,
+    )
     draw_placed_labels!(p, lines_by_region, placements, font, gap, leader_style)
+    draw_placed_set_labels!(p, set_lines, set_placements)
+    return
+end
+
+function combo_color(combo, base)
+    sets = String.(split(combo, '&'))
+    return blend_region_color(RGBf[base[name] for name in sets if haskey(base, name)])
+end
+
+function draw_glyphs!(p, fit, counts, options, style, obstacles, base)
+    counts isa AbstractDict ||
+        throw(ArgumentError("eunoia: glyphs must be a region-to-count mapping"))
+    opts = option_obstacles(options, obstacles)
+    placed = Eunoia.place_glyphs(fit, counts; opts...)
+    override = _kw(style)
+    for (combo, points) in placed.positions
+        isempty(points) && continue
+        color = combo_color(combo, base)
+        attrs = merge(
+            (
+                marker = :circle,
+                markersize = 2 * placed.radius,
+                markerspace = :data,
+                color = color,
+                strokecolor = color,
+                strokewidth = 0.5,
+            ),
+            override,
+        )
+        scatter!(p, Point2f[Point2f(pt.x, pt.y) for pt in points]; attrs...)
+    end
+    return placed
+end
+
+function draw_members!(ax, p, fit, members, options, style, obstacles, fontsize, font)
+    members isa AbstractDict ||
+        throw(ArgumentError("eunoia: members must be a region-to-names mapping"))
+    labels = Dict{String, Vector{String}}(
+        string(combo) => string.(collect(names)) for (combo, names) in members
+    )
+    attrs = _kw(style)
+    reference_size = haskey(attrs, :fontsize) ? Float64(attrs.fontsize) :
+        fontsize * QUANTITY_FONT_FACTOR
+    draw_attrs = haskey(attrs, :fontsize) ?
+        Base.structdiff(attrs, NamedTuple{(:fontsize,)}) : attrs
+    sx, sy = axis_scale(ax)
+    sizes = Dict{String, Vector{Tuple{Float64, Float64}}}(
+        combo => [
+            (
+                Float64(_line_dims(text, reference_size, font)[1]) * sx,
+                Float64(_line_dims(text, reference_size, font)[2]) * sy,
+            ) for text in texts
+        ] for (combo, texts) in labels
+    )
+    opts = option_obstacles(options, obstacles)
+    placed = Eunoia.place_glyph_boxes(fit, sizes; opts...)
+    for (combo, boxes) in placed.boxes
+        texts = get(labels, combo, String[])
+        for (i, box) in enumerate(boxes)
+            i > length(texts) && break
+            text!(
+                p,
+                Point2f(box.center.x, box.center.y);
+                text = texts[i],
+                align = (:center, :center),
+                fontsize = reference_size * placed.scale,
+                draw_attrs...,
+            )
+        end
+    end
+    return placed
+end
+
+function draw_placed_set_labels!(p, lines_by_set, placements)
+    for (name, lines) in lines_by_set
+        haskey(placements, name) || continue
+        text, fontsize, style = only(lines)
+        anchor = placements[name].anchor
+        attrs = merge((align = (:center, :center), fontsize = fontsize), _kw(style))
+        text!(p, Point2f(anchor.x, anchor.y); text = text, attrs...)
+    end
     return
 end
 
