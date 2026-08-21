@@ -68,17 +68,27 @@ struct Container
     height::Float64
 end
 
+"""An axis-aligned rectangle used as a label or glyph keep-out box."""
+struct BoundingBox
+    center::Point
+    width::Float64
+    height::Float64
+end
+
+BoundingBox(x::Real, y::Real, width::Real, height::Real) =
+    BoundingBox(Point(float(x), float(y)), float(width), float(height))
+
 """
     LabelPlacement
 
-A resolved label position returned by [`place_labels`](@ref). `anchor` is the
-centre of the label box. `kind` is one of `:interior`, `:exterior_raycast`,
-`:exterior_force_directed`, or `:exterior_elbow` (`:unknown` for a future native
-variant). For exterior placements that need a leader line, `tether` is the
-inside-region point the leader starts from, `leader_end` is where it meets the
-label box, and `leader_waypoints` are the intermediate polyline vertices (empty
-for straight leaders, populated for elbow leaders); all three are `nothing`/
-empty for interior placements.
+A resolved label position returned by [`place_labels`](@ref) or
+[`place_set_labels`](@ref). `anchor` is the center of the label box. `kind` is
+one of `:interior`, `:exterior_raycast`, `:exterior_force_directed`,
+`:exterior_elbow`, `:exterior_matched`, or `:exterior_set` (`:unknown` for a
+future native variant). For exterior placements that need a leader line,
+`tether` is the inside-region point the leader starts from, `leader_end` is
+where it meets the label box, and `leader_waypoints` are the intermediate
+polyline vertices. Set-label placements carry no leader geometry.
 """
 struct LabelPlacement
     anchor::Point
@@ -86,6 +96,32 @@ struct LabelPlacement
     tether::Union{Point, Nothing}
     leader_end::Union{Point, Nothing}
     leader_waypoints::Vector{Point}
+end
+
+"""
+    GlyphPlacements
+
+Result of [`place_glyphs`](@ref). `radius` is shared by every glyph,
+`positions` contains glyph centers by region, and `unplaced` reports any
+shortfall when a fixed radius could not accommodate every requested glyph.
+"""
+struct GlyphPlacements
+    radius::Float64
+    positions::Dict{String, Vector{Point}}
+    unplaced::Dict{String, Int}
+end
+
+"""
+    GlyphBoxPlacements
+
+Result of [`place_glyph_boxes`](@ref). `scale` is the diagram-wide factor to
+apply to the reference text size. Each vector in `boxes` is a prefix aligned
+with the corresponding input sizes; `unplaced` reports the omitted suffix.
+"""
+struct GlyphBoxPlacements
+    scale::Float64
+    boxes::Dict{String, Vector{BoundingBox}}
+    unplaced::Dict{String, Int}
 end
 
 """Supertype of [`EulerFit`](@ref) and [`VennFit`](@ref), parametrized by the
@@ -178,6 +214,38 @@ function _build_placements(resp)
         )
     end
     return out
+end
+
+"""Parse the boxes returned by `eunoia_label_boxes`."""
+function _build_boxes(resp)
+    return BoundingBox[
+        BoundingBox(Float64(b.x), Float64(b.y), Float64(b.width), Float64(b.height))
+        for b in resp.boxes
+    ]
+end
+
+"""Parse an `eunoia_place_glyphs` response."""
+function _build_glyph_placements(resp)
+    positions = Dict{String, Vector{Point}}(
+        String(k) => [_xy(p) for p in points]
+        for (k, points) in pairs(resp.positions)
+    )
+    unplaced = haskey(resp, :unplaced) ?
+        Dict{String, Int}(String(k) => Int(n) for (k, n) in pairs(resp.unplaced)) :
+        Dict{String, Int}()
+    return GlyphPlacements(Float64(resp.radius), positions, unplaced)
+end
+
+"""Parse an `eunoia_place_glyph_boxes` response."""
+function _build_glyph_box_placements(resp)
+    boxes = Dict{String, Vector{BoundingBox}}(
+        String(k) => [BoundingBox(b[1], b[2], b[3], b[4]) for b in values]
+        for (k, values) in pairs(resp.boxes)
+    )
+    unplaced = haskey(resp, :unplaced) ?
+        Dict{String, Int}(String(k) => Int(n) for (k, n) in pairs(resp.unplaced)) :
+        Dict{String, Int}()
+    return GlyphBoxPlacements(Float64(resp.scale), boxes, unplaced)
 end
 
 """Build a [`Point`](@ref) from a JSON `[x, y]` pair."""

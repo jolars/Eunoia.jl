@@ -5,9 +5,8 @@ Julia bindings for [eunoia](https://github.com/jolars/eunoia), a Rust library
 for area-proportional Euler and Venn diagrams.
 
 The native code is the `eunoia-capi` cdylib, which speaks a small JSON-in/
-JSON-out C ABI (`eunoia_euler`, `eunoia_venn`, `eunoia_version`, `eunoia_free`).
-This module dlopen's it and exposes [`euler`](@ref), [`venn`](@ref), and
-[`version`](@ref).
+JSON-out C ABI. This module loads it and exposes fitting, label placement,
+glyph placement, and rendering through a typed Julia API.
 
 ## Locating the library
 
@@ -32,9 +31,10 @@ using JSON3
 using Printf
 
 export euler, venn, version, eunoiaplot, eunoiaplot!, place_labels
+export label_boxes, place_set_labels, place_glyphs, place_glyph_boxes
 export EulerFit, VennFit, Circle, Ellipse, Square, Rectangle, RotatedRectangle
-export Point, Container
-export LabelPlacement
+export Point, Container, BoundingBox
+export LabelPlacement, GlyphPlacements, GlyphBoxPlacements
 
 include("parse.jl")
 include("types.jl")
@@ -44,6 +44,10 @@ const _HANDLE = Ref{Ptr{Cvoid}}(C_NULL)
 const _euler = Ref{Ptr{Cvoid}}(C_NULL)
 const _venn = Ref{Ptr{Cvoid}}(C_NULL)
 const _place_labels = Ref{Ptr{Cvoid}}(C_NULL)
+const _label_boxes = Ref{Ptr{Cvoid}}(C_NULL)
+const _place_set_labels = Ref{Ptr{Cvoid}}(C_NULL)
+const _place_glyphs = Ref{Ptr{Cvoid}}(C_NULL)
+const _place_glyph_boxes = Ref{Ptr{Cvoid}}(C_NULL)
 const _version = Ref{Ptr{Cvoid}}(C_NULL)
 const _free = Ref{Ptr{Cvoid}}(C_NULL)
 
@@ -94,6 +98,10 @@ function __init__()
     _euler[] = Libdl.dlsym(_HANDLE[], :eunoia_euler)
     _venn[] = Libdl.dlsym(_HANDLE[], :eunoia_venn)
     _place_labels[] = Libdl.dlsym(_HANDLE[], :eunoia_place_labels)
+    _label_boxes[] = Libdl.dlsym(_HANDLE[], :eunoia_label_boxes)
+    _place_set_labels[] = Libdl.dlsym(_HANDLE[], :eunoia_place_set_labels)
+    _place_glyphs[] = Libdl.dlsym(_HANDLE[], :eunoia_place_glyphs)
+    _place_glyph_boxes[] = Libdl.dlsym(_HANDLE[], :eunoia_place_glyph_boxes)
     _version[] = Libdl.dlsym(_HANDLE[], :eunoia_version)
     _free[] = Libdl.dlsym(_HANDLE[], :eunoia_free)
     return nothing
@@ -344,9 +352,9 @@ tokens are rejected by the native core and surface as an error:
 
 - `leader`: leader edge type, `"straight"` (default) or `"elbow"` (d3-pie style
   orthogonal leaders with column-based placement).
-- `placement`: exterior solver for straight leaders, `"raycast"` (default) or
-  `"force_directed"` (spring/repulsion relaxation for crowded diagrams); ignored
-  for `"elbow"`.
+- `placement`: exterior solver for straight leaders, `"raycast"` (default),
+  `"force_directed"` (spring/repulsion relaxation for crowded diagrams), or
+  `"matched"` (noncrossing boundary labels); ignored for `"elbow"`.
 - `margin`: gap between the diagram and exterior labels (both edge types); the
   per-region proportional default applies when omitted.
 - `iterations`: iteration cap for `"force_directed"` (default `200`); ignored
@@ -412,6 +420,177 @@ function place_labels(
     return _build_placements(_run(_place_labels[], payload))
 end
 
+_rect_payload(r::Union{BoundingBox, Container}) = Dict(
+    "x" => r.center.x,
+    "y" => r.center.y,
+    "width" => r.width,
+    "height" => r.height,
+)
+
+function _sizes_payload(sizes::AbstractDict)
+    return Dict{String, Any}(
+        string(k) => Float64[float(v[1]), float(v[2])] for (k, v) in sizes
+    )
+end
+
+function _obstacles_payload(obstacles)
+    obstacles === nothing && return nothing
+    return [_rect_payload(box) for box in obstacles]
+end
+
+"""
+    label_boxes(placements, sizes; padding=0) -> Vector{BoundingBox}
+
+Convert resolved label placements and their measured `(width, height)` sizes
+into padded, axis-aligned keep-out boxes. The result can be passed as
+`obstacles` to [`place_set_labels`](@ref), [`place_glyphs`](@ref), or
+[`place_glyph_boxes`](@ref).
+"""
+function label_boxes(
+    placements::AbstractDict,
+    sizes::AbstractDict;
+    padding::Real = 0,
+)
+    placement_payload = Dict{String, Any}()
+    for (key, placement) in placements
+        placement isa LabelPlacement ||
+            throw(ArgumentError("label_boxes: placements must contain LabelPlacement values"))
+        placement_payload[string(key)] =
+            Dict("anchor" => Float64[placement.anchor.x, placement.anchor.y])
+    end
+    payload = Dict(
+        "placements" => placement_payload,
+        "sizes" => _sizes_payload(sizes),
+        "padding" => float(padding),
+    )
+    return _build_boxes(_run(_label_boxes[], payload))
+end
+
+"""
+    place_set_labels(fit, sizes; margin=nothing, angular_steps=nothing,
+                     obstacles=nothing, precision=nothing)
+
+Place one measured label per set just outside that set's shape. Labels hug the
+shape boundary and need no leader line. `sizes` maps set names to
+`(width, height)` pairs in diagram coordinates. Returns a
+`Dict{String,LabelPlacement}` keyed by set name.
+"""
+function place_set_labels(
+    fit::AbstractEulerFit,
+    sizes::AbstractDict;
+    margin::Union{Nothing, Real} = nothing,
+    angular_steps::Union{Nothing, Integer} = nothing,
+    obstacles::Union{Nothing, AbstractVector} = nothing,
+    precision::Union{Nothing, Real} = nothing,
+)
+    payload = Dict{String, Any}(
+        "outlines" => fit.plot_data.shape_outlines,
+        "sizes" => _sizes_payload(sizes),
+    )
+    fit.container === nothing || (payload["container"] = _rect_payload(fit.container))
+
+    strategy = Dict{String, Any}()
+    margin === nothing || (strategy["margin"] = float(margin))
+    angular_steps === nothing || (strategy["angular_steps"] = Int(angular_steps))
+    precision === nothing || (strategy["precision"] = float(precision))
+    obstacle_payload = _obstacles_payload(obstacles)
+    obstacle_payload === nothing || (strategy["obstacles"] = obstacle_payload)
+    isempty(strategy) || (payload["strategy"] = strategy)
+
+    return _build_placements(_run(_place_set_labels[], payload))
+end
+
+"""
+    place_glyphs(fit, counts; arrangement=nothing, radius=nothing, gap=nothing,
+                 seed=nothing, precision=nothing, max_attempts=nothing,
+                 obstacles=nothing) -> GlyphPlacements
+
+Pack equally sized circular glyphs inside fitted regions. `counts` maps
+canonical region combinations to nonnegative integer counts. Omit `radius` to
+choose the largest shared radius that accommodates every requested glyph.
+"""
+function place_glyphs(
+    fit::AbstractEulerFit,
+    counts::AbstractDict;
+    arrangement::Union{Nothing, AbstractString} = nothing,
+    radius::Union{Nothing, Real} = nothing,
+    gap::Union{Nothing, Real} = nothing,
+    seed::Union{Nothing, Integer} = nothing,
+    precision::Union{Nothing, Real} = nothing,
+    max_attempts::Union{Nothing, Integer} = nothing,
+    obstacles::Union{Nothing, AbstractVector} = nothing,
+)
+    count_payload = Dict{String, Int}()
+    for (key, count) in counts
+        (count isa Integer && !(count isa Bool) && count >= 0) || throw(
+            ArgumentError("place_glyphs: counts must be nonnegative integers"),
+        )
+        count_payload[string(key)] = Int(count)
+    end
+    payload = Dict{String, Any}(
+        "regions" => fit.plot_data.region_pieces,
+        "counts" => count_payload,
+    )
+    options = Dict{String, Any}()
+    arrangement === nothing || (options["arrangement"] = arrangement)
+    radius === nothing || (options["radius"] = float(radius))
+    gap === nothing || (options["gap"] = float(gap))
+    seed === nothing || (options["seed"] = UInt64(seed))
+    precision === nothing || (options["precision"] = float(precision))
+    max_attempts === nothing || (options["max_attempts"] = Int(max_attempts))
+    obstacle_payload = _obstacles_payload(obstacles)
+    obstacle_payload === nothing || (options["obstacles"] = obstacle_payload)
+    isempty(options) || (payload["options"] = options)
+
+    return _build_glyph_placements(_run(_place_glyphs[], payload))
+end
+
+"""
+    place_glyph_boxes(fit, sizes; arrangement=nothing, scale=nothing,
+                      min_scale=nothing, gap=nothing, seed=nothing,
+                      precision=nothing, max_attempts=nothing,
+                      obstacles=nothing) -> GlyphBoxPlacements
+
+Pack ordered, caller-measured member-label boxes inside fitted regions.
+`sizes` maps each canonical region combination to a vector of `(width, height)`
+pairs. The returned boxes are a prefix aligned with each input vector; render
+the corresponding text at the reference font size multiplied by `scale`.
+"""
+function place_glyph_boxes(
+    fit::AbstractEulerFit,
+    sizes::AbstractDict;
+    arrangement::Union{Nothing, AbstractString} = nothing,
+    scale::Union{Nothing, Real} = nothing,
+    min_scale::Union{Nothing, Real} = nothing,
+    gap::Union{Nothing, Real} = nothing,
+    seed::Union{Nothing, Integer} = nothing,
+    precision::Union{Nothing, Real} = nothing,
+    max_attempts::Union{Nothing, Integer} = nothing,
+    obstacles::Union{Nothing, AbstractVector} = nothing,
+)
+    sizes_payload = Dict{String, Any}(
+        string(key) => [Float64[float(size[1]), float(size[2])] for size in region_sizes]
+        for (key, region_sizes) in sizes
+    )
+    payload = Dict{String, Any}(
+        "regions" => fit.plot_data.region_pieces,
+        "sizes" => sizes_payload,
+    )
+    options = Dict{String, Any}()
+    arrangement === nothing || (options["arrangement"] = arrangement)
+    scale === nothing || (options["scale"] = float(scale))
+    min_scale === nothing || (options["min_scale"] = float(min_scale))
+    gap === nothing || (options["gap"] = float(gap))
+    seed === nothing || (options["seed"] = UInt64(seed))
+    precision === nothing || (options["precision"] = float(precision))
+    max_attempts === nothing || (options["max_attempts"] = Int(max_attempts))
+    obstacle_payload = _obstacles_payload(obstacles)
+    obstacle_payload === nothing || (options["obstacles"] = obstacle_payload)
+    isempty(options) || (payload["options"] = options)
+
+    return _build_glyph_box_placements(_run(_place_glyph_boxes[], payload))
+end
+
 """
     version() -> String
 
@@ -433,7 +612,8 @@ end
 
 """
     eunoiaplot(fit; colors, fills, edges, labels, quantities, legend, complement,
-               fontsize=14, label_placement=true, leader_style=(;), figure=(;), axis=(;))
+               fontsize=14, label_placement=true, set_label_placement=false,
+               glyphs=nothing, members=nothing, figure=(;), axis=(;))
     eunoiaplot(gridpos, fit; axis=(;), kwargs...)
 
 Render a fitted [`EulerFit`](@ref)/[`VennFit`](@ref) as a publication-ready Makie
@@ -480,6 +660,17 @@ Collision-aware labels:
   `label_placement = (; leader = "elbow", tether = "boundary")`. Pass
   `label_placement=false` to instead draw labels at their raw anchors.
 - `leader_style`: collection of `lines!` keywords styling the leader lines.
+- `set_label_placement`: `false` (default) keeps set names inside their regions;
+  `true` places them just outside their own shape, and a `NamedTuple`/`Dict`
+  additionally forwards `margin`, `angular_steps`, `obstacles`, and `precision`
+  to [`place_set_labels`](@ref).
+- `glyphs`: an explicit region-to-integer-count mapping. Circular glyphs are
+  packed with [`place_glyphs`](@ref); use `glyph_options` for placement knobs and
+  `glyph_style` for Makie `scatter!` attributes.
+- `members`: an explicit region-to-ordered-names mapping. Names are measured,
+  packed with [`place_glyph_boxes`](@ref), and scaled uniformly; use
+  `member_options` and `member_style` to customize them. `glyphs` and `members`
+  are mutually exclusive.
 
 Collision-aware placement needs the axis (to convert pixel text metrics to
 layout units), so it is available through `eunoiaplot`/`eunoiaplot!` only; the
@@ -488,11 +679,12 @@ bare `plot(fit)` recipe form ignores `label_placement`.
 function eunoiaplot end
 
 """
-    eunoiaplot!(ax, fit; label_placement=true, leader_style=(;), kwargs...)
+    eunoiaplot!(ax, fit; label_placement=true, set_label_placement=false,
+                glyphs=nothing, members=nothing, leader_style=(;), kwargs...)
 
-Draw a fitted diagram into an existing Makie axis `ax`. Same styling keywords as
-[`eunoiaplot`](@ref) (including `label_placement`/`leader_style` for collision-aware
-labels, on by default); does not alter the axis aspect or decorations.
+Draw a fitted diagram into an existing Makie axis `ax`. It accepts the same
+styling and placement keywords as [`eunoiaplot`](@ref), but does not alter the
+axis aspect or decorations.
 """
 function eunoiaplot! end
 
