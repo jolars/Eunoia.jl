@@ -3,7 +3,8 @@ name: Update artifacts
 # Open a PR repinning `Artifacts.toml` whenever a new eunoia release ships its
 # capi binaries. Driven cross-repo by jolars/eunoia's `julia-artifacts` workflow
 # (a `repository_dispatch` sent once the per-platform tarballs are attached to
-# the release), or run manually with a tag.
+# the release), or run manually with a tag. Once the replacement PR exists,
+# close artifact update PRs for older stable releases.
 
 on:
   repository_dispatch:
@@ -44,6 +45,7 @@ jobs:
           julia --project=. gen/generate_artifacts.jl "${{ steps.tag.outputs.tag }}"
 
       - name: Open pull request
+        id: pr
         uses: peter-evans/create-pull-request@v7
         with:
           # A PAT / GitHub App token, NOT the default GITHUB_TOKEN, so the opened
@@ -62,3 +64,44 @@ jobs:
 
             Triggered by a new release in jolars/eunoia. Review the diff, bump
             `version` in `Project.toml` if the ABI or behavior changed, then merge.
+
+      - name: Close superseded artifact pull requests
+        if: steps.pr.outputs.pull-request-number != '' && steps.pr.outputs.pull-request-operation != 'closed'
+        uses: actions/github-script@v7
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.pull-request-number }}
+          RELEASE_TAG: ${{ steps.tag.outputs.tag }}
+        with:
+          script: |
+            const prefix = "chore/artifacts-";
+            const parseVersion = tag => /^v(\d+)\.(\d+)\.(\d+)$/.exec(tag)?.slice(1).map(Number);
+            const target = parseVersion(process.env.RELEASE_TAG);
+            if (!target) {
+              core.info("Skipping cleanup for a non-stable release tag.");
+              return;
+            }
+
+            function isOlder(tag) {
+              const version = parseVersion(tag);
+              if (!version) return false;
+              for (let i = 0; i < target.length; i++) {
+                if (version[i] !== target[i]) return version[i] < target[i];
+              }
+              return false;
+            }
+
+            const { owner, repo } = context.repo;
+            const prs = await github.paginate(github.rest.pulls.list, {
+              owner, repo, state: "open", base: "main", per_page: 100,
+            });
+            for (const pr of prs) {
+              if (pr.number === Number(process.env.PR_NUMBER) ||
+                  pr.head.repo?.full_name !== `${owner}/${repo}` ||
+                  !pr.head.ref.startsWith(prefix) ||
+                  !isOlder(pr.head.ref.slice(prefix.length))) continue;
+
+              await github.rest.pulls.update({
+                owner, repo, pull_number: pr.number, state: "closed",
+              });
+              core.info(`Closed superseded artifact update #${pr.number}.`);
+            }
