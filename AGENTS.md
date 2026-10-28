@@ -97,12 +97,18 @@ release is in the *other* repo. To cut a release:
    julia --project=. gen/generate_artifacts.jl v<version>
    ```
 
-3. Bump `version` in `Project.toml` (independent semver — not tied to the Rust
-   crate's version) and merge.
+3. Merge the package changes using Conventional Commits. Versionary opens a
+   release PR that updates `Project.toml` and `CHANGELOG.md`; the Julia version
+   remains independent of the Rust crate's version. Review and merge that PR.
 
-4. Register: comment `@JuliaRegistrator register` on the release commit.
-   `TagBot` then creates the matching GitHub tag/release; end users `add Eunoia`
-   and the right binary is fetched lazily — no Rust toolchain required.
+4. After CI passes, the workflow requests Registrator registration on the exact
+   release commit with the reviewed changelog. Once the registry accepts it,
+   TagBot creates the tag and GitHub release. End users `add Eunoia` and fetch
+   the right binary lazily, without a Rust toolchain.
+
+Versionary uses `release-mode: external`, so it waits for TagBot instead of
+creating tags. To retry a registration request, manually run CI on `main` with
+`retry-registration` enabled. It preserves the pending release commit.
 
 ## Conventions
 
