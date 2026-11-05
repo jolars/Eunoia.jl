@@ -97,30 +97,50 @@ Documentation for the whole family lives at
 
 ## Citation
 
-If you use Eunoia.jl in your research, please cite Larsson and Lee (2026),
-[Eunoia: Area-Proportional Euler and Venn Diagrams in Rust, Julia, Python, R,
-and JavaScript](https://doi.org/10.48550/arXiv.2611.02198).
+If you use Eunoia.jl in your research, please cite the paper:
+
+> Larsson, J., & Lee, N. M. (2026). *Eunoia: Area-Proportional Euler and Venn
+> Diagrams in Rust, Julia, Python, R, and JavaScript* (arXiv:2611.02198). arXiv.
+> <https://doi.org/10.48550/arXiv.2611.02198>
 
 ```bibtex
 @misc{larsson2026f,
-  title = {Eunoia: {Area}-Proportional {Euler} and {Venn} Diagrams in {Rust}, {Julia}, {Python}, {R}, and {JavaScript}},
-  shorttitle = {Eunoia},
-  author = {Larsson, Johan and Lee, Nicole M.},
-  year = 2026,
-  month = nov,
-  number = {arXiv:2611.02198},
-  eprint = {2611.02198},
-  primaryclass = {stat.CO},
-  publisher = {arXiv},
-  doi = {10.48550/arXiv.2611.02198},
+  title         = {Eunoia: {{Area}}-Proportional {{Euler}} and {{Venn}} Diagrams in {{Rust}}, {{Julia}}, {{Python}}, {{R}}, and {{JavaScript}}},
+  shorttitle    = {Eunoia},
+  author        = {Larsson, Johan and Lee, Nicole M.},
+  year          = {2026},
+  month         = nov,
+  number        = {arXiv:2611.02198},
+  eprint        = {2611.02198},
+  primaryclass  = {stat.CO},
+  publisher     = {arXiv},
+  doi           = {10.48550/arXiv.2611.02198},
   archiveprefix = {arXiv}
 }
 ```
 
-Other citation formats are available on the
-[Eunoia citation page](https://eunoia.bz/cite/).
+<details>
+<summary>BibLaTeX</summary>
 
-Machine-readable citation metadata is available in [CITATION.cff](CITATION.cff).
+```bibtex
+@online{larsson2026f,
+  title       = {Eunoia: {{Area}}-Proportional {{Euler}} and {{Venn}} Diagrams in {{Rust}}, {{Julia}}, {{Python}}, {{R}}, and {{JavaScript}}},
+  shorttitle  = {Eunoia},
+  author      = {Larsson, Johan and Lee, Nicole M.},
+  date        = {2026-11-01},
+  eprint      = {2611.02198},
+  eprinttype  = {arXiv},
+  eprintclass = {stat.CO},
+  doi         = {10.48550/arXiv.2611.02198},
+  pubstate    = {prepublished}
+}
+```
+
+</details>
+
+[CITATION.cff](CITATION.cff) contains the software metadata and preferred paper
+citation. The [Eunoia citation page](https://eunoia.bz/cite/) renders the paper
+in APA, BibTeX, BibLaTeX, and other formats.
 
 ## Contributing
 
