@@ -56,3 +56,28 @@ eunoiaplot(fit; quantities = true, legend = true)
 
 See the [gallery](@ref "A gallery of Euler and Venn diagrams") for a tour of the
 plotting options.
+
+## Citation
+
+If you use Eunoia.jl in your research, please cite Larsson and Lee (2026),
+[Eunoia: Area-Proportional Euler and Venn Diagrams in Rust, Julia, Python, R,
+and JavaScript](https://doi.org/10.48550/arXiv.2611.02198).
+
+```bibtex
+@misc{larsson2026f,
+  title = {Eunoia: {Area}-Proportional {Euler} and {Venn} Diagrams in {Rust}, {Julia}, {Python}, {R}, and {JavaScript}},
+  shorttitle = {Eunoia},
+  author = {Larsson, Johan and Lee, Nicole M.},
+  year = 2026,
+  month = nov,
+  number = {arXiv:2611.02198},
+  eprint = {2611.02198},
+  primaryclass = {stat.CO},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2611.02198},
+  archiveprefix = {arXiv}
+}
+```
+
+Other citation formats are available on the
+[Eunoia citation page](https://eunoia.bz/cite/).

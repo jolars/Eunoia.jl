@@ -95,6 +95,33 @@ Related packages include:
 Documentation for the whole family lives at
 [eunoia.bz/docs/](https://eunoia.bz/docs/).
 
+## Citation
+
+If you use Eunoia.jl in your research, please cite Larsson and Lee (2026),
+[Eunoia: Area-Proportional Euler and Venn Diagrams in Rust, Julia, Python, R,
+and JavaScript](https://doi.org/10.48550/arXiv.2611.02198).
+
+```bibtex
+@misc{larsson2026f,
+  title = {Eunoia: {Area}-Proportional {Euler} and {Venn} Diagrams in {Rust}, {Julia}, {Python}, {R}, and {JavaScript}},
+  shorttitle = {Eunoia},
+  author = {Larsson, Johan and Lee, Nicole M.},
+  year = 2026,
+  month = nov,
+  number = {arXiv:2611.02198},
+  eprint = {2611.02198},
+  primaryclass = {stat.CO},
+  publisher = {arXiv},
+  doi = {10.48550/arXiv.2611.02198},
+  archiveprefix = {arXiv}
+}
+```
+
+Other citation formats are available on the
+[Eunoia citation page](https://eunoia.bz/cite/).
+
+Machine-readable citation metadata is available in [CITATION.cff](CITATION.cff).
+
 ## Contributing
 
 When writing commit messages, please use the [conventional commits

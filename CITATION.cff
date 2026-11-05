@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+title: 'Eunoia: Area-proportional Euler and Venn diagrams for Julia'
+message: If you use this software, please cite the paper in preferred-citation.
+type: software
+authors:
+  - family-names: Larsson
+    given-names: Johan
+    orcid: https://orcid.org/0000-0002-4029-5945
+repository-code: https://github.com/jolars/Eunoia.jl
+url: https://jolars.github.io/Eunoia.jl/
+license: MIT
+preferred-citation:
+  type: article
+  title: 'Eunoia: Area-Proportional Euler and Venn Diagrams in Rust, Julia,
+    Python, R, and JavaScript'
+  authors:
+    - family-names: Larsson
+      given-names: Johan
+      orcid: https://orcid.org/0000-0002-4029-5945
+    - family-names: Lee
+      given-names: Nicole M.
+  journal: arXiv
+  year: 2026
+  month: 11
+  date-published: '2026-11-01'
+  doi: 10.48550/arXiv.2611.02198
+  url: https://arxiv.org/abs/2611.02198
